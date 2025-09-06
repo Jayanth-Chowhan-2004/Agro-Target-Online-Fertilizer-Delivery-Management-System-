@@ -1,0 +1,2 @@
+# Agro-Target-Online-Fertilizer-Delivery-Management-System-
+AgroTarget is a comprehensive web application built with HTML, CSS, and JavaScript. It provides a streamlined Online Fertilizer Delivery System for convenient ordering and tracking, a Labor Database Management System for efficient staff organization, and a Crop and Fertilizer Recommendation System for data-driven yields and sustainable practices.
