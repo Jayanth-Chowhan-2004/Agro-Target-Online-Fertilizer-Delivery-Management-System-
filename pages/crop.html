@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agro Target FertilizeX - Crop & Fertilizer Recommendation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin:0; padding:0;
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f0f8ff, #cce4f7);
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    transition: background 0.5s ease;
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #004d40;
+    text-shadow: 1px 1px 3px #b2dfdb;
+  }
+  .container {
+    max-width: 960px;
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: fadeIn 1s ease forwards;
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    margin-top: 1.2rem;
+    margin-bottom: 0.4rem;
+    color: #00695c;
+  }
+  select, input[type="number"] {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid #b2dfdb;
+    transition: border-color 0.3s ease;
+  }
+  select:focus, input[type="number"]:focus {
+    border-color: #004d40;
+    outline: none;
+  }
+  button {
+    margin-top: 2rem;
+    padding: 0.8rem 1.6rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: #00796b;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px #004d40aa;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #004d40;
+  }
+  .results {
+    margin-top: 2rem;
+    padding: 1.4rem 1.6rem;
+    border-radius: 12px;
+    background: #e0f2f1;
+    color: #004d40;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 10px rgba(0,77,64,0.2);
+    min-height: 120px;
+  }
+  .lang-switch {
+    position: fixed;
+    top: 1rem;
+    right: 1.5rem;
+  }
+  .lang-switch button {
+    background: #004d40;
+    color: white;
+    border-radius: 50px;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-left: 0.4rem;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 2px 8px #00251a;
+  }
+  .lang-switch button.active {
+    background: #00796b;
+    box-shadow: 0 2px 8px #004d40;
+  }
+  @keyframes fadeIn {
+    from {opacity:0; transform: translateY(20px);}
+    to {opacity:1; transform: translateY(0);}
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-switch" aria-label="Language Switch">
+  <button id="btn-en" class="active" aria-pressed="true">English</button>
+  <button id="btn-te" aria-pressed="false">తెలుగు</button>
+</div>
+
+<h1 id="page-title">Crop & Fertilizer Recommendation</h1>
+
+<div class="container" role="main" aria-label="Recommendation Form">
+
+  <label for="state-select" id="label-state">Select State</label>
+  <select id="state-select" aria-describedby="label-state" required></select>
+
+  <label for="district-select" id="label-district">Select District</label>
+  <select id="district-select" aria-describedby="label-district" required></select>
+
+  <label for="soil-select" id="label-soil">Select Soil Type</label>
+  <select id="soil-select" aria-describedby="label-soil" required></select>
+
+  <label for="crop-select" id="label-crop">Select Crop Type</label>
+  <select id="crop-select" aria-describedby="label-crop" required></select>
+
+  <label for="season-select" id="label-season">Select Season</label>
+  <select id="season-select" aria-describedby="label-season" required></select>
+
+  <label for="soilph-input" id="label-soilph">Select Soil pH Value</label>
+  <select id="soilph-input" aria-describedby="label-soilph" required></select>
+
+  <button id="btn-recommend">Get Recommendation</button>
+
+  <div class="results" id="result" aria-live="polite" aria-atomic="true"></div>
+
+</div>
+
+<script>
+  // Data: States with districts EN and TE
+  const STATES_DISTRICTS = {
+    en: {
+      "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Kadapa", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari"],
+      "Arunachal Pradesh": ["Anjaw", "Changlang", "Dibang Valley", "East Kameng", "East Siang", "Kurung Kumey", "Lohit", "Longding", "Lower Dibang Valley", "Lower Subansiri", "Papum Pare", "Tawang", "Tirap", "Upper Siang", "Upper Subansiri", "West Kameng", "West Siang"],
+      "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan", "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "Tinsukia", "Udalguri"],
+      "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+      "Chattisgarh": ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kanker", "Kondagaon", "Korba", "Korea", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+      "Goa": ["North Goa", "South Goa"],
+      "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+      "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+      "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+      "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Kodarma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahibganj", "Saraikela-Kharsawan", "Simdega"],
+      "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapura", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayanagara", "Yadgir"],
+      "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+      "Madhya Pradesh": ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+      "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+      "Manipur": ["Bishnupur", "Churachandpur", "Chandel", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Toubal", "Ukhrul"],
+      "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+      "Mizoram": ["Aizawl", "Champhai", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Serchhip"],
+      "Nagaland": ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"],
+      "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Keonjhar", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Sonepur", "Sundargarh"],
+      "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Firozpur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar", "Sangrur", "Tarn Taran"],
+      "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karoli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+      "Sikkim": ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+      "Tamil Nadu": ["Ariyalur", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Salem", "Sivagangai", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+      "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Komaram Bheem Asifabad", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal-Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Rangareddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+      "Tripura": ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+      "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shrawasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+      "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+      "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+    },
+    te: {
+      "ఆంధ్రప్రదేశ్": ["అనంతపురం", "చిత్తూరు", "తూర్పు గోదావరి", "గుంటూరు", "కడప", "కృష్ణ", "కర్నూలు", "నెల్లూరు", "ప్రకాశం", "శ్రీకాకుళం", "విశాఖపట్నం", "విజయనగరం", "పడమటి గోదావరి"],
+      "అరుణాచల్ ప్రదేశ్": ["అంజావ్", "చాంగ్లాంగ్", "డిబాంగ్ వ్యాలీ", "తూర్పు కామెంగ్", "తూర్పు సియాంగ్", "కురుంగ్ కుమే", "లోహిట్", "లాంగ్డింగ్", "లోయర్ డిబాంగ్ వ్యాలీ", "లోయర్ సుబంసిరి", "పాపుమ్ పరే", "టావాంగ్", "టిరాప్", "అప్పర్ సియాంగ్", "అప్పర్ సుబంసిరి", "పడమటి కామెంగ్", "పడమటి సియాంగ్"],
+      "అస్సాం": ["బాక్సా", "బర్పేటా", "బిస్వనాథ్", "బొంగాయగోన్", "కాచార్", "చరాయిదో", "చిరాంగ్", "దరంగ్", "ధీమాజి", "ధుబ్రి", "దిబ్రుగఢ్", "గోలాపారా", "గోలఘట్", "హైలాకాండీ", "హోజై", "జోర్జాట్", "కమ్రుప్ మెట్రోపొలిటన్", "కమ్రుప్", "కార్బి అంగ్లోంగ్", "కరీమ్ గంజ్", "కోక్రజార్", "లఖింపూర్", "మజులి", "మోరిగావాన్", "నాగావాన్", "నల్బరి", "సివసగర్", "సోనిత్ పుర్", "తింసుకియా", "ఉడాల్గురి"],
+      "బిహార్": ["అరరియా", "అర్వాల్", "అరంగాబాద్", "బాంకా", "బేగుసరాయ్", "భగలపూర్", "భోజ్పూర్", "బూసార్", "దర్భంగా", "తూర్పు చంపారాన్", "గ్యా", "గోపాల్ గంజ్", "జముయి", "జెహనాబాద్", "కైమూర్", "కటిహార్", "ఖగారియా", "కిషంగంజ్", "లఖిసరాయ్", "మధేపురా", "మధుబనీ", "ముంగేరు", "ముజఫ్ఫర్ పుర్", "నలందా", "నవాడా", "పట్నా", "పూర్నియా", "రోహతాస్", "సహర్షా", "సమస్తిపూర్", "సరాన్", "షెఠ్ పురా", "షేఓహర్", "సితామర్", "సివాన్", "సుపాల్", "వైషాలి", "పడమటి చంపారాన్"],
+      "ఛత్తీస్‌గఢ్": ["బలోద్", "బలోదా బజార్", "బల్రాంపూర్", "బస్తర్", "బిమేటారా", "బీజాపూర్", "బిలాస్పూర్", "దంతేవాడ", "ధమ్తరి", "దుర్గ్", "గరియాబాండ్", "జంజీర్-చంపా", "జశ్ పుర్", "కంకర్", "కొండగావాన్", "కొర్బా", "కోరియా", "మహాసముంద్", "ముంగెలి", "నారాయణ్ పూర్", "రాయగఢ్", "రాయపూర్", "రాజనందగావోన్", "సుక్మా", "సురజ్పూర్", "సుర్గుజా"],
+      "గోవా": ["ఉత్తర గోవా", "దక్షిణ గోవా"],
+      "గుజరాత్": ["అహ్మదాబాద్", "అమ్రేలీ", "అనంద్", "అరవల్లి", "బనస్కంతా", "భరూచ్", "భావనగర్", "బోటాడ్", "చోటా ఉడపూర్", "దాహోద్", "డంగ్", "దేవభూమి ద్వారకా", "గాంధీనగర్", "గిర్ సోమనాథ్", "జామ్ నగర్", "జునగఢ్", "ఖేధా", "కుచ్", "మహిసాగర్", "మెహసానా", "మోర్బీ", "నర్మదా", "నవసారీ", "పంచమహల్", "పటన్", "పోర్బందర్", "రాజ్ కోట్", "సబరకంఠా", "సురట్", "సురేంద్రనగర్", "తాపీ", "వదోదర", "వల్సాద్"],
+      "హర్యానా": ["అంబాలా", "భివాని", "చర్కీ దాద్రి", "ఫరీదాబాద్", "ఫతేహాబాద్", "గుర్గావ్", "హిసార్", "ఝాజ్జర్", "జింద్", "కైతాల్", "కర్ణాల్", "కురుక్షేత్ర", "మహేంద్రగర్", "నుహ్", "పల్వాల్", "పంచకుల", "పానిపత్", "రేవరి", "రోటాక్", "సిర్సా", "సోనిపత్", "యమునానగర్"],
+      "హిమాచల్ ప్రదేశ్": ["బిలాస్పూర్", "చంబా", "హమీర్పూర్", "కంగ్రా", "కిన్నూర్", "కుల్లు", "లాహుల్ మరియు స్పిటి", "మండి", "శిమ్లా", "సిర్మౌర్", "సోలన్", "ఉన"],
+      "ఝార్ఖండ్": ["బోకారో", "చత్ర", "దెఓఘర్", "ధన్బాద్", "దుమ్కా", "తూర్పు సింగ్ భూమ్", "గర్భ", "గిరిఢీహ్", "గొడ్డా", "గుమ్లా", "హజారిభాగ్", "జమ్తారా", "ఖుంటి", "కొడర్మా", "లతెహర్", "లోహర్డగా", "పకూర్", "పలాము", "రామఘర్", "రాంచీ", "సాహిబ్ గంజ్", "సరైకెలా-ఖర్సావాన్", "సిమ్ డేగా"],
+      "కర్ణాటక": ["బాగలకోట", "బల్లారి", "బెలగావి", "బెంగళూరు రూరల్", "బెంగళూరు అర్బన్", "బీదర్", "చమరాజనగర్", "చిక్కబల్లాపుర", "చిక్కమగలూరు", "చిత్తుర్డు", "దక్షిణ కన్నడ", "దవనగేరె", "ధార్వాడ్", "గడగ్", "హస్సన్", "హవేరి", "కలబురಗಿ", "కొడాగు", "కొలార్", "కొప్పాల్", "మండ్య", "మైసూరు", "రాయ్చూర్", "రామనగర", "శివమోగ్గ", "తుమకూరు", "ఉడుపి", "ఉత్తర కన్నడ", "విజయనగర", "యాదగిరి"],
+      "కేరళ": ["అలప్పుఝా", "ఎర్నాకులం", "ఇడుక్కి", "కన్నూరు", "కాసర్గోడు", "కొల్లం", "కొట్టాయం", "కొజికోడ్", "మలప్పురం", "పాలക്കാട്", "పథానమిత్త", "తిరువనంతపురం", "త్రిశ్సూర్", "వയనాడు"],
+      "మధ్యప్రదేశ్": ["ఆగర్ మల్వా", "అలిరాజ్పూర్", "అనుపూర్", "అశోక్ నగర్", "బలఘట్", "బర్వానీ", "బేతుల్", "భింద్", "భోపాల్", "బుర్హాన్పూర్", "ఛత్తర్పూర్", "ఛింద్వారా", "దమోహ్", "దతియా", "దేవాస్", "ధార్", "దిందోరి", "గుణా", "గ్వాలియర్", "హర్దా", "హోషంగాబాద్", "ఇంద్రోర్", "జబల్పూర్", "జభువా", "కట్ని", "ఖండ్వా", "ఖార్గోన్", "మండ్లా", "మండ్సౌర్", "మోరేనా", "నర్సింఘ్ పుర్", "నీమచ్", "పన్నా", "రైసెన్", "రాజ్ ఘర్", "రాత్లాం", "రేవా", "సాగర్", "సత్నా", "సేహోర్", "సియోని", "శజాపూర్", "శియోపూర్", "శివపురి", "సిద్ధీ", "సింగ్రౌలి", "టికమర్గర్", "ఉజ్జైన్", "ఉమారియా", "వీధీషా"],
+      "మహారాష్ట్ర": ["అహ్మద్ నగర్", "అకొలా", "అమరవతి", "అరంగాబాద్", "బీడ్", "భండారా", "బుల్దానా", "చంద్రపూర్", "ధులే", "గడ్చిరోలి", "గొండియా", "హింగోలీ", "జల్గావ్", "జాల్నా", "కొల్పూర్", "లతూర్", "ముంబై నగరం", "ముంబై ఉపనగరం", "నాగ్ పుర్", "నాందుర్బార్", "నాసిక్", "ఓస్మానాబాద్", "పల్గర్", "పర్భాని", "పూణే", "రైతాగడ్", "రత్నాగిరి", "సంగ్లీ", "సతారా", "సింధుదుర్గ్", "సోలాపూర్", "తానే", "వర్ధా", "వాషిమ్", "యవత్మాల్"],
+      "మణిపూర్": ["బిష్నుపుర్", "చురచంద్ పుర్", "చాండేల్", "ఇంపాల్ తూర్పు", "ఇంపాల్ పశ్చిమ", "జిరిబాం", "కాక్చింగ్", "కామ్జోంగ్", "కాంగ్ పొక్పి", "నోనీ", "ఫెర్జవల్", "సేనపాటి", "తమేంగ్ లాంగ్", "తెంగ్నూపాల్", "తౌబల్", "ఉఖ్రుల్"],
+      "మెగాలయ": ["తూర్పు గారో హిల్స్", "తూర్పు జయంతియా హిల్స్", "తూర్పు ఖాసీ హిల్స్", "ఉత్తర గారో హిల్స్", "రిభోయ్", "దక్షిణ గారో హిల్స్", "దక్షిణ పశ్చిమ గారో హిల్స్", "దక్షిణ పశ్చిమ ఖాసీ హిల్స్", "పడమటి గారో హిల్స్", "పడమటి జయంతియా హిల్స్", "పడమటి ఖాసీ హిల్స్"],
+      "మిజోరమ్": ["అయిజావల్", "చాంఫై", "కొలాసిబ్", "లాంగ్ట్లాయి", "లంగ్లీ", "మామిట్", "సైహా", "సెర్చిప్"],
+      "నాగాలాండ్": ["డిమాపూర్", "కిప్హైర్", "కొహిమా", "లాంగ్లెంగ్", "మోకోఘుంచ్", "మోన్", "పెరెన్", "ఫేక్", "ట్యూన్‌సాంగ్", "వోఖా", "జున్హెబోటో"],
+      "ఓడిషా": ["అంగుల్", "బలంగిర్", "బాలాసోర్", "బర్గర్", "భద్రక్", "బౌధ్", "కటక్", "దేఓగఢ్", "ధేనకనాల్", "గజపతి", "గంజాం", "జగత్సింగ్పూర్", "జాజ్పూర్", "ఝర్సుగుడా", "కలాహాండి", "కందహమల్", "కేంద్రపర", "కెయోంజర్", "కొరపుట్", "మల్కంగిరి", "మయురభంజ్", "నబరంగపూర్", "నయగఢ్", "నూపడా", "పురి", "రాయగఢ్", "సంబల్పూర్", "సోనెపూర్", "సుందర్గఢ్"],
+      "పంజాబ్": ["అమృతసర్", "బర్నాలా", "బాథిండి", "ఫరీద్‌కోట్", "ఫతేహ్‌గర్ సింగ్", "ఫజిల్కా", "ఫిరోజ్‌పూర్", "గురుదాస్పూర్", "హోషియర్పూర్", "జలంధర్", "కపుర్తలా", "లుధియానా", "మంసా", "మోగా", "ముక్తసర్", "పాథంకోట్", "పటియాల", "రూప్ నగర్", "సాహిబజడా అజిత్ సింగ్ నగర్", "సంగ్రూర్", "టార్న్ టార్న్"],
+      "రాజస్థాన్": ["అజ్మీర్", "అల్వార్", "బన్స్వారా", "బారణ్", "బర్మర్", "భరత్పూర్", "భీల్వారా", "బికానర్", "బుండీ", "చిత్తోర్గఢ్", "చురు", "దౌసా", "ధోల్పూర్", "డుంగర్ పూర్", "హనుమంగర్", "జైపూర్", "జైసల్మేర్", "జలోర్", "ఝలవార్", "ఝుంఝునూ", "జోధ్ పూర్", "కరోలి", "కోట", "నగౌర్", "పాలి", "ప్రతాప్ ఘర్", "రాజసమంద్", "సవై మాధోపూర్", "సికార్", "సిరోహి", "శ్రీ గంగానగర్", "టోంక్", "ఉదయపూర్"],
+      "సిక్కిం": ["తూర్పు సిక్కిం", "ఉత్తర సిక్కిం", "దక్షిణ సిక్కిం", "పడమటి సిక్కిం"],
+      "తమిళనాడు": ["అరియాలూర్", "చెన్నై", "కొయంబత్తూరు", "కుడ్డాళూర్", "ధర్మపురి", "దిండిగుల్", "ఈరోడ్", "కాంచీపురం", "కన్యాకుమారి", "కరూర్", "కృష్ణగిరి", "మదురై", "నాగపట్టిణం", "నమక్కల్", "నిల్గిరీస్", "పేరంబలూరు", "పుదుక్కోట్టై", "రామనాధపురం", "సేలం", "శివగంగై", "థంజావూరు", "థేణి", "తూతుక్కుడి", "తిరుచ్చిరపల్లి", "తిరునెల్వేలి", "తిరుప్పూర్", "తిరువల్లూర్", "తిరువన్నమలై", "తిరువారూర్", "వెల్లోర్", "విలుప్పురం", "విరుదునగర్"],
+      "తెలంగాణ": ["అదిలాబాద్", "భద్రాద్రి కోతగూడెం", "హైదరాబాద్", "జగిత్యాల", "జనగాన్", "జయశంకర్ భూపాలపల్లి", "జోగులాంబ గద్వాల్", "కమారెడ్డి", "కరీంనగర్", "ఖమ్మం", "కొమరం భీమ్ ఆసిఫాబాద్", "మహబూబాబాద్", "మహబూబ్ నగర్", "మంచేరియాల్", "మేడక్", "మేధ్చల్-మల్కాజ్గిరి", "ములుగు", "నాగర్ కర్నూల్", "నల్గొండ", "నారాయణపేట్", "నిర్మల్", "నిజామాబాద్", "పెద్దపల్లి", "రాజన్న సిర్సిల్ల", "రంగారెడ్డి", "సంగారెడ్డి", "సిద్దిపేట్", "సూర్యపేట్", "వికారాబాద్", "వనపర్తి", "వారంగల్ రూరల్", "వారంగల్ అర్బన్", "యాదాద్రి భువనగిరి"],
+      "త్రిపుర": ["ధలై", "గోమతి", "ఖోవాయి", "ఉత్తర త్రిపుర", "సెపహిజాల", "దక్షిణ త్రిపుర", "ఉనాకోటి", "పడమటి త్రిపుర"],
+      "ఉత్తర్ ప్రదేశ్": ["అగ్రా", "అలీగఢ్", "అల్లహాబాద్", "అంబేద్కర్ నగర్", "అమేథి", "అమ్రోహా", "అఠరియా", "అజమఘర్", "బఘ్పట్", "బహ్రైచ్", "బాలియా", "బల్రాంపూర్", "బండా", "బరాబంకి", "బరేలోయి", "బస్తి", "భదోిహి", "బీజ్నోర్", "బడౌన్", "బులంద్ షహర్", "చందౌలి", "చిత్రకూట్", "దేవొరియా", "ఎటా", "ఎటవాహ్", "ఫర్రుఖాబాద్", "ఫతేఘ్పూర్", "ఫిరోజాబాద్", "గౌతమ్ బుద్ధ నగర్", "ఘజీపూర్", "గొండ", "గోరఖ్పూర్", "హమీర్పూర్", "హాపూర్", "హర్దోయ్", "హత్రాస్", "జలౌన్", "జౌన్పూర్", "కన్నౌజ్", "కనుపూర్ డేహట్", "కనుపూర్ నగర్", "కస్గంజ్", "కౌషంబి", "ఖేరి", "కుషీనగర్", "లలిత్ పుర్", "లక్నో", "మహారాజ్ గంజ్", "మహోబా", "మైన్ పూరి", "మతురా", "మౌ", "మీరుట్", "మిర్జాపూర్", "మురాదాబాద్", "ముజఫ్ఫర్ నగర్", "పిలిభిట్", "ప్రతాప్ ఘర్", "రాయబరేలీ", "రాంపూర్", "సహరణ్ పూర్", "సంభల్", "సంత్ కబీర్ నగర్", "శాజహన్ పూర్", "షామ్లి", "శ్రవస్తి", "సిద్ధార్థ నగర్", "సితాపూర్", "సోన్భద్రా", "సుల్తాన్పూర్", "ఉన్నావ్", "వరణాసి"],
+      "ఉత్తరాఖండ్": ["అల్మోరా", "బాగేశ్వర్", "చమోలి", "చంపవత్", "దేహరాడూన్", "హరిద్వార్", "నెయినిటాల్", "పౌరి గఢ్వాల్", "పిఠోరగఢ్", "రుద్రప్రయాగ్", "తేహ్రీ గఢ్వాల్", "ఉధమ్ సింగ్ నగర్", "ఉత్తరాఖండ"],
+      "పశ్చిమ బంగాళా": ["అలీపుర్దువార్", "బాంకురా", "బిర్బుహం", "కుచ్ బీహార్", "దక్షిణ దినాజ్‌పూర్", "దార్జిలింగ్", "హుగ్లీ", "హౌరా", "జలపైగురి", "ఝర్గ్రామ్", "కలింపోంగ్", "కొల్కతా", "మాల్డా", "ముర్షిదాబాద్", "నాదియా", "ఉత్తర 24 పర్గానాస్", "పశ్చిమ బర్ధమాన్", "పశ్చిమ మేదినిపూర్", "పూర్వ బర్ధమాన్", "పూర్వ మేదినిపూర్", "పురూలియా", "దక్షిణ 24 పర్గానాస్", "ఉత్తర దినాజ్‌పూర్"]
+    }
+  };
+
+  // Soil types EN + TE
+  const SOIL_TYPES = {
+    en: [
+      "Alluvial", "Black", "Red", "Laterite", "Desert", "Mountain", "Clay", "Sandy", "Loamy", "Peaty", 
+      "Saline", "Chalky", "Marshy", "Saline-Alkaline", "Gravelly", "Rocky", "Organic", "Calcareous", "Volcanic", "Silty"
+    ],
+    te: [
+      "అల్లువియల్", "నల్లటి", "ఎరుపు", "లెటరైట్", "అడవి", "పర్వత", "మట్టి", "వాలివేసిన", "లోమీ", "పీటి", 
+      "ఉప్పు", "చాక్లీ", "మడిక", "ఉప్పు-అల్కలైన్", "గోరువెయ్యి", "రాకీ", "సేంద్రీయ", "కాల్కరియస్", "అగ్నిపర్వత", "సిల్లీ"
+    ]
+  };
+
+  // Crop types EN + TE (sample 50)
+  const CROP_TYPES = {
+    en: [
+      "Rice", "Wheat", "Maize", "Sugarcane", "Cotton", "Groundnut", "Soybean", "Sunflower", "Potato", "Tomato",
+      "Chili", "Cabbage", "Onion", "Pea", "Barley", "Mustard", "Sesame", "Turmeric", "Tea", "Coffee",
+      "Banana", "Mango", "Apple", "Orange", "Pear", "Plum", "Guava", "Jackfruit", "Papaya", "Pineapple",
+      "Coconut", "Arecanut", "Cashew", "Almond", "Walnut", "Chickpea", "Lentil", "Beans", "Sugar Beet", "Tobacco",
+      "Jute", "Millet", "Sorghum", "Buckwheat", "Cottonseed", "Rapeseed", "Flax", "Coriander", "Fenugreek", "Mint"
+    ],
+    te: [
+      "అన్నం", "గోధుమ", "మొక్కజొన్న", "చెరకు", "పత్తి", "సెనగలు", "సోయాబీన్", "సూర్యకాంతి", "ఉరుకలు", "టొమాటో",
+      "మిరపకాయ", "గోబి", "ఉల్లిపాయ", "పప్పు", "జొన్న", "ఆవాలు", "ఎళ్లికాయ", "పసుపు", "చాయ", "కాఫీ",
+      "బనానా", "మామిడి", "ఆపిల్", "సనత్రం", "పియర్", "ప్లమ్", "గువావా", "జాక్ఫ్రూట్", "పపయా", "అనాస",
+      "కొబ్బరి", "అరకనట్", "కజు", "బాదం", "అఖरోట", "చిక్పి", "మసూరి పప్పు", "బీన్స్", "చక్కెర బీట్", "తమాకు",
+      "జూట్", "సజ్జ", "జొన్న పప్పు", "బక్ వీట్", "పత్తి గింజ", "రేప్ సీడ్", "ఫ్లాక్స్", "కొత్తిమీర", "మెంతులు", "పుదీనా"
+    ]
+  };
+
+  // Seasons EN + TE
+  const SEASONS = {
+    en: ["Kharif", "Rabi", "Zaid"],
+    te: ["ఖరిఫ్", "రబీ", "జైద్"]
+  };
+
+  // Soil pH Values (numeric) - range 4.5 to 9.0 in steps of 0.5 approx
+  const SOIL_PH_VALUES = {
+    en: ["4.5", "5.0", "5.5", "6.0", "6.5", "7.0", "7.5", "8.0", "8.5", "9.0"],
+    te: ["4.5", "5.0", "5.5", "6.0", "6.5", "7.0", "7.5", "8.0", "8.5", "9.0"]
+  };
+
+  // Fertilizers sample data (simplified) + tips in EN and TE
+  const FERTILIZERS = [
+    {id: "urea", en: "Urea (Nitrogen Fertilizer)", te: "యూరియా (నైట్రోజన్ ఎరువు)"},
+    {id: "dap", en: "DAP (Di-Ammonium Phosphate)", te: "డిఎఏపీ (డై-అమోనియం ఫాస్ఫేట్)"},
+    {id: "mop", en: "MOP (Muriate of Potash)", te: "ఎంపీఓ (పొటాష్ మురియేట్)"},
+    {id: "ssp", en: "SSP (Single Super Phosphate)", te: "ఎస్‌ఎస్‌పి (సింగిల్ సూపర్ ఫాస్ఫేట్)"},
+    {id: "zinc", en: "Zinc Sulfate", te: "జింక్ సల్ఫేట్"},
+    {id: "borax", en: "Borax (Boron Fertilizer)", te: "బోరాక్స్ (బోరాన్ ఎరువు)"},
+    // ... add more fertilizers as needed (total 30 if required)
+  ];
+
+  // Crop Tips by soil type and crop (example structure)
+  // You can expand or replace with more detailed real-world data
+  const CROP_TIPS = {
+    en: {
+      "Alluvial": "Alluvial soil is fertile and ideal for growing rice, wheat, sugarcane, and vegetables. The soil retains moisture well, supporting good crop growth.",
+      "Black": "Black soil retains moisture and is perfect for cotton, maize, and pulses. It's rich in calcium carbonate, magnesium, and lime.",
+      "Red": "Red soil is well-drained and suitable for growing cotton, wheat, and pulses. Regular organic manure improves fertility.",
+      // Add for all 20 soil types similarly
+    },
+    te: {
+      "అల్లువియల్": "అల్లువియల్ మట్టి సేంద్రియ ద్రవ్యాలు మరియు పోషకాలు అధికంగా ఉండి అన్నం, గోధుమ, చెరకు మరియు కూరగాయలు పండించడానికి అనుకూలంగా ఉంటుంది.",
+      "నల్లటి": "నల్లటి మట్టి తేమను నిలుపుతూ పత్తి, మొక్కజొన్న మరియు పప్పు పంటలకు ఉత్తమంగా ఉంటుంది. ఇది కాల్షియం కార్బోనేట్, మాగ్నీషియం మరియు చున్నీతో సంపన్నం.",
+      "ఎరుపు": "ఎరుపు మట్టి బాగా డ్రెయిన్ అయ్యేలా ఉండి పత్తి, గోధుమ మరియు పప్పు పంటలకు అనుకూలం. రెగ్యులర్ ఆర్గానిక్ మణూర్ fertility పెంచుతుంది.",
+      // Complete for all 20 soil types
+    }
+  };
+
+  // Fertilizer Tips (example)
+  const FERTILIZER_TIPS = {
+    en: {
+      "urea": "Urea provides nitrogen which is essential for leafy growth. Apply carefully as excess nitrogen can harm the plants.",
+      "dap": "DAP supplies nitrogen and phosphorus, essential for root development and growth.",
+      "mop": "MOP supplies potassium, important for flowering and fruiting.",
+      "ssp": "SSP improves phosphorus content in soil, aiding root growth.",
+      "zinc": "Zinc sulfate corrects zinc deficiency improving crop yield.",
+      "borax": "Borax supplies boron, vital for cell wall formation and seed development.",
+    },
+    te: {
+      "యూరియా": "యూరియా నైట్రోజన్ అందిస్తుంది, ఇది ఆకుల పెరుగుదలకు అవసరం. అధిక నైట్రోజన్ పంటలకు హానికరం కావచ్చు.",
+      "డిఎఏపీ": "డిఎఏపీ నైట్రోజన్ మరియు ఫాస్ఫరస్ అందిస్తుంది, ఇది రూట్ అభివృద్ధికి అవసరం.",
+      "ఎంపీఓ": "ఎంపీఓ పొటాషియం అందిస్తుంది, ఇది పుష్పించడం మరియు ఫలాలు పెరగడానికి ముఖ్యం.",
+      "ఎస్‌ఎస్‌పి": "ఎస్‌ఎస్‌పి ఫాస్ఫరస్ పెంచుతుంది, ఇది రూట్ అభివృద్ధికి సహాయపడుతుంది.",
+      "జింక్ సల్ఫేట్": "జింక్ సల్ఫేట్ జింక్ లోపాన్ని సరిచేస్తుంది, పంట దిగుబడిని పెంచుతుంది.",
+      "బోరాక్స్": "బోరాక్స్ బోరాన్ అందిస్తుంది, ఇది సెల్ వాల్ మరియు విత్తన అభివృద్ధికి ముఖ్యం.",
+    }
+  };
+
+  // Utility: Map fertilizer id to object
+  const fertilizerMap = {};
+  FERTILIZERS.forEach(f => fertilizerMap[f.id] = f);
+
+  // Populate dropdowns and language switching logic
+  const stateSelect = document.getElementById("state-select");
+  const districtSelect = document.getElementById("district-select");
+  const soilSelect = document.getElementById("soil-select");
+  const cropSelect = document.getElementById("crop-select");
+  const seasonSelect = document.getElementById("season-select");
+  const soilPhInput = document.getElementById("soilph-input");
+  const btnRecommend = document.getElementById("btn-recommend");
+  const resultDiv = document.getElementById("result");
+
+  const btnEn = document.getElementById("btn-en");
+  const btnTe = document.getElementById("btn-te");
+  const pageTitle = document.getElementById("page-title");
+
+  // Labels for language switching
+  const labels = {
+    en: {
+      state: "Select State",
+      district: "Select District",
+      soil: "Select Soil Type",
+      crop: "Select Crop Type",
+      season: "Select Season",
+      soilph: "Select Soil pH Value",
+      button: "Get Recommendation",
+      title: "Crop & Fertilizer Recommendation",
+      noDistrict: "Select a state first to see districts",
+      noResult: "Please fill all fields to get recommendation."
+    },
+    te: {
+      state: "రాష్ట్రాన్ని ఎంచుకోండి",
+      district: "జిల్లాను ఎంచుకోండి",
+      soil: "మట్టిప unsడాన్ని ఎంచుకోండి",
+      crop: "పంట రకాన్ని ఎంచుకోండి",
+      season: "కాలాన్ని ఎంచుకోండి",
+      soilph: "మట్టి pH విలువను ఎంచుకోండి",
+      button: "సిఫార్సు పొందండి",
+      title: "పంట & ఎరువుల సిఫార్సు",
+      noDistrict: "జిల్లాలు చూడటానికి ముందుగా రాష్ట్రాన్ని ఎంచుకోండి",
+      noResult: "సిఫార్సు పొందడానికి అన్ని ఫీల్డులను నింపండి."
+    }
+  };
+
+  // Current language (default English)
+  let currentLang = "en";
+
+  // Populate States
+  function populateStates() {
+    clearSelect(stateSelect);
+    addOption(stateSelect, "", labels[currentLang].state);
+    const states = Object.keys(STATES_DISTRICTS[currentLang === "en" ? "en" : "te"]);
+    states.forEach(state => addOption(stateSelect, state, state));
+    clearSelect(districtSelect);
+    addOption(districtSelect, "", labels[currentLang].noDistrict);
+  }
+
+  // Populate Districts based on selected state
+  function populateDistricts(state) {
+    clearSelect(districtSelect);
+    if (!state) {
+      addOption(districtSelect, "", labels[currentLang].noDistrict);
+      return;
+    }
+    const districts = STATES_DISTRICTS[currentLang === "en" ? "en" : "te"][state];
+    districts.forEach(district => addOption(districtSelect, district, district));
+  }
+
+  // Populate Soil Types
+  function populateSoilTypes() {
+    clearSelect(soilSelect);
+    addOption(soilSelect, "", labels[currentLang].soil);
+    SOIL_TYPES[currentLang].forEach(soil => addOption(soilSelect, soil, soil));
+  }
+
+  // Populate Crop Types
+  function populateCropTypes() {
+    clearSelect(cropSelect);
+    addOption(cropSelect, "", labels[currentLang].crop);
+    CROP_TYPES[currentLang].forEach(crop => addOption(cropSelect, crop, crop));
+  }
+
+  // Populate Seasons
+  function populateSeasons() {
+    clearSelect(seasonSelect);
+    addOption(seasonSelect, "", labels[currentLang].season);
+    SEASONS[currentLang].forEach(season => addOption(seasonSelect, season, season));
+  }
+
+  // Populate Soil pH
+  function populateSoilPh() {
+    clearSelect(soilPhInput);
+    SOIL_PH_VALUES[currentLang].forEach(ph => addOption(soilPhInput, ph, ph));
+  }
+
+  // Add option helper
+  function addOption(select, value, text) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = text;
+    select.appendChild(option);
+  }
+
+  // Clear select helper
+  function clearSelect(select) {
+    while (select.firstChild) {
+      select.removeChild(select.firstChild);
+    }
+  }
+
+  // Language switch handlers
+  btnEn.addEventListener("click", () => {
+    currentLang = "en";
+    updateLabels();
+    populateStates();
+    populateSoilTypes();
+    populateCropTypes();
+    populateSeasons();
+    populateSoilPh();
+    resultDiv.innerHTML = "";
+  });
+
+  btnTe.addEventListener("click", () => {
+    currentLang = "te";
+    updateLabels();
+    populateStates();
+    populateSoilTypes();
+    populateCropTypes();
+    populateSeasons();
+    populateSoilPh();
+    resultDiv.innerHTML = "";
+  });
+
+  // Update all labels on page for current language
+  function updateLabels() {
+    pageTitle.textContent = labels[currentLang].title;
+    document.getElementById("label-state").textContent = labels[currentLang].state;
+    document.getElementById("label-district").textContent = labels[currentLang].district;
+    document.getElementById("label-soil").textContent = labels[currentLang].soil;
+    document.getElementById("label-crop").textContent = labels[currentLang].crop;
+    document.getElementById("label-season").textContent = labels[currentLang].season;
+    document.getElementById("label-soilph").textContent = labels[currentLang].soilph;
+    btnRecommend.textContent = labels[currentLang].button;
+  }
+
+  // On state change populate districts
+  stateSelect.addEventListener("change", () => {
+    const state = stateSelect.value;
+    populateDistricts(state);
+  });
+
+  // Recommendation logic (simplified example)
+  btnRecommend.addEventListener("click", () => {
+    const state = stateSelect.value;
+    const district = districtSelect.value;
+    const soil = soilSelect.value;
+    const crop = cropSelect.value;
+    const season = seasonSelect.value;
+    const soilPh = soilPhInput.value;
+
+    if (!state || !district || !soil || !crop || !season || !soilPh) {
+      resultDiv.innerHTML = `<p class="error">${labels[currentLang].noResult}</p>`;
+      return;
+    }
+
+    // Crop recommendation based on state, district, soil (simple matching)
+    let cropTip = CROP_TIPS[currentLang][soil] || (currentLang === "en" ? "No tips available for selected soil." : "ఎంచుకున్న మట్టికి సూచనలు అందుబాటులో లేవు.");
+
+    // Fertilizer recommendation logic (simplified)
+    let fertilizerId = "urea"; // default
+    if (crop.toLowerCase().includes("rice")) fertilizerId = "dap";
+    else if (crop.toLowerCase().includes("cotton")) fertilizerId = "mop";
+    else if (crop.toLowerCase().includes("wheat")) fertilizerId = "ssp";
+
+    let fertilizerName = fertilizerMap[fertilizerId][currentLang];
+    let fertilizerTip = FERTILIZER_TIPS[currentLang][fertilizerId] || (currentLang === "en" ? "No fertilizer tips available." : "ఎరువుల సూచనలు అందుబాటులో లేవు.");
+
+    resultDiv.innerHTML = `
+      <h3>${currentLang === "en" ? "Crop Recommendation" : "పంట సిఫార్సు"}</h3>
+      <p><strong>${crop}</strong> - ${cropTip}</p>
+      <h3>${currentLang === "en" ? "Fertilizer Recommendation" : "ఎరువుల సిఫార్సు"}</h3>
+      <p><strong>${fertilizerName}</strong> - ${fertilizerTip}</p>
+    `;
+  });
+
+  // Initialize page on load
+  window.onload = () => {
+    populateStates();
+    populateSoilTypes();
+    populateCropTypes();
+    populateSeasons();
+    populateSoilPh();
+    updateLabels();
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - FertilizeX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .sidebar {
+      transition: all 0.3s ease;
+    }
+    .sidebar.collapsed {
+      width: 80px;
+    }
+    .sidebar.collapsed .sidebar-text {
+      display: none;
+    }
+    .sidebar.collapsed .sidebar-icon {
+      margin-right: 0;
+    }
+    .active-tab {
+      background-color: #EFF6FF;
+      border-left: 4px solid #3B82F6;
+      color: #3B82F6;
+    }
+    .chart-container {
+      height: 300px;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .btn-spin:hover i {
+      animation: spin 0.5s linear;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Check if admin is logged in -->
+  <script>
+    if (!localStorage.getItem('adminLoggedIn')) {
+      window.location.href = 'admin-login.html';
+    }
+  </script>
+
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow-md w-64 flex-shrink-0">
+      <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center">
+          <img src="../images/Logo.jpg" alt="FertilizeX Logo" class="h-20 w-20">
+          <span class="sidebar-text ml-3 text-xl font-semibold">FertilizeX</span>
+        </div>
+        <button id="toggleSidebar" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      
+      <div class="p-4">
+        <div class="mb-8">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <i class="fas fa-user-shield text-blue-600"></i>
+            </div>
+            <div class="sidebar-text ml-3">
+              <p class="font-medium">Admin User</p>
+              <p class="text-xs text-gray-500">Super Admin</p>
+            </div>
+          </div>
+        </div>
+        
+        <nav>
+          <ul class="space-y-2">
+            <li>
+              <a href="/index.html" class="flex items-center p-3 rounded-lg hover:bg-gray-100">
+                <i class="sidebar-icon fas fa-home text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Home</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showDashboard()" class="flex items-center p-3 rounded-lg hover:bg-gray-100 active-tab" id="dashboardTab">
+                <i class="sidebar-icon fas fa-tachometer-alt text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showUsers()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="usersTab">
+                <i class="sidebar-icon fas fa-users text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Users</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showProducts()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="productsTab">
+                <i class="sidebar-icon fas fa-boxes text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Products</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showOrders()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="ordersTab">
+                <i class="sidebar-icon fas fa-shopping-cart text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Orders</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showAnalytics()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="analyticsTab">
+                <i class="sidebar-icon fas fa-chart-line text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Analytics</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showActivities()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="activitiesTab">
+                <i class="sidebar-icon fas fa-history text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Activities</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" onclick="showSettings()" class="flex items-center p-3 rounded-lg hover:bg-gray-100" id="settingsTab">
+                <i class="sidebar-icon fas fa-cog text-gray-600 mr-3"></i>
+                <span class="sidebar-text">Settings</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      
+      <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
+        <button onclick="logout()" class="flex items-center w-full p-3 rounded-lg hover:bg-gray-100 text-red-600">
+          <i class="sidebar-icon fas fa-sign-out-alt mr-3"></i>
+          <span class="sidebar-text">Logout</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+      <!-- Top Navigation -->
+      <header class="bg-white shadow-sm">
+        <div class="flex items-center justify-between p-4">
+          <h1 class="text-2xl font-semibold text-gray-800" id="pageTitle">Dashboard</h1>
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <button onclick="showNotifications()" class="p-2 rounded-full hover:bg-gray-100 relative">
+                <i class="fas fa-bell text-gray-600"></i>
+                <span id="notificationBadge" class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+              </button>
+            </div>
+            <div class="relative">
+              <button onclick="showMessages()" class="p-2 rounded-full hover:bg-gray-100 relative">
+                <i class="fas fa-envelope text-gray-600"></i>
+                <span id="messageBadge" class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full hidden"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Dashboard Content -->
+      <main class="p-6">
+        <div id="dashboardContent" class="fade-in">
+          <!-- Dynamic content will appear here -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold mb-4">Add New User</h3>
+        <form id="addUserForm">
+          <div class="space-y-4">
+            <div>
+              <label for="userName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" id="userName" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="userPhone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input type="tel" id="userPhone" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="userAddress" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea id="userAddress" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+            <div>
+              <label for="userRole" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select id="userRole" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                <option value="customer">Customer</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label for="userPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <input type="password" id="userPassword" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" onclick="document.getElementById('addUserModal').classList.add('hidden')" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+              Add User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="addProductModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold mb-4">Add New Product</h3>
+        <form id="addProductForm">
+          <div class="space-y-4">
+            <div>
+              <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+              <input type="text" id="productName" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select id="productCategory" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                <option value="Organic">Organic</option>
+                <option value="Chemical">Chemical</option>
+                <option value="Natural">Natural</option>
+                <option value="Bio Fertilizers">Bio Fertilizers</option>
+                <option value="Liquid Fertilizers">Liquid Fertilizers</option>
+                <option value="Micronutrient Mixes">Micronutrient Mixes</option>
+                <option value="Soil Conditioners">Soil Conditioners</option>
+              </select>
+            </div>
+            <div>
+              <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+              <input type="number" id="productPrice" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="productStock" class="block text-sm font-medium text-gray-700 mb-1">Stock (kg)</label>
+              <input type="number" id="productStock" required class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+              <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea id="productDescription" rows="3" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" onclick="document.getElementById('addProductModal').classList.add('hidden')" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
+              Add Product
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="notificationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold">Notifications</h3>
+          <button onclick="document.getElementById('notificationModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="notificationList" class="space-y-3 max-h-96 overflow-y-auto">
+          <!-- Notifications will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      showDashboard();
+      
+      // Sidebar toggle functionality
+      document.getElementById('toggleSidebar').addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+      });
+      
+      // Load notifications
+      loadNotifications();
+      
+      // Check for updates every 30 seconds
+      setInterval(checkForUpdates, 30000);
+    });
+
+    // Tab switching function
+    function switchTab(selectedTab) {
+      // Remove active class from all tabs
+      document.querySelectorAll('nav a').forEach(tab => {
+        tab.classList.remove('active-tab');
+      });
+      
+      // Add active class to selected tab
+      document.getElementById(selectedTab).classList.add('active-tab');
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('adminLoggedIn');
+      window.location.href = 'admin-login.html';
+    }
+
+    // Load data from external files and sync with other pages
+    async function getUsers() {
+      // Check localStorage first
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+      
+      // Try to load from register.html
+      try {
+        const formData = JSON.parse(localStorage.getItem("formData") || "[]");
+        
+        formData.forEach(data => {
+          if (!users.some(u => u.phone === data.phone)) {
+            users.push({
+              id: Date.now().toString(),
+              name: data.name,
+              phone: data.phone,
+              address: data.address,
+              role: 'customer',
+              joined: new Date().toISOString().split('T')[0],
+              password: data.password
+            });
+          }
+        });
+        
+        localStorage.setItem("users", JSON.stringify(users));
+      } catch (error) {
+        console.error('Error loading users from register.html:', error);
+      }
+      
+      return users;
+    }
+
+    async function getProducts() {
+      let products = JSON.parse(localStorage.getItem("products") || "[]");
+      
+      try {
+        const productData = JSON.parse(localStorage.getItem("productData") || "[]");
+        
+        productData.forEach(data => {
+          if (!products.some(p => p.name === data.name)) {
+            products.push({
+              id: Date.now().toString(),
+              name: data.name,
+              price: parseFloat(data.price),
+              category: data.category || 'General',
+              stock: parseInt(data.stock || 100),
+              description: data.description || ''
+            });
+          }
+        });
+        
+        localStorage.setItem("products", JSON.stringify(products));
+      } catch (error) {
+        console.error('Error loading products from products.html:', error);
+      }
+      
+      return products;
+    }
+
+    async function getOrders() {
+      let orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      
+      try {
+        const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "[]");
+        const invoiceData = JSON.parse(localStorage.getItem("invoiceData") || "[]");
+        
+        const allOrders = [...checkoutData, ...invoiceData];
+        
+        allOrders.forEach(order => {
+          if (!orders.some(o => o.id === order.id)) {
+            orders.push({
+              id: order.id || 'ORD-' + Math.floor(10000 + Math.random() * 90000),
+              customer: order.customer || 'Unknown',
+              date: order.date || new Date().toISOString().split('T')[0],
+              amount: parseFloat(order.amount) || 0,
+              status: order.status || 'pending',
+              products: order.products || [],
+              address: order.address || ''
+            });
+          }
+        });
+        
+        localStorage.setItem("orders", JSON.stringify(orders));
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      }
+      
+      return orders;
+    }
+
+    // Load notifications
+    function loadNotifications() {
+      const notifications = JSON.parse(localStorage.getItem("notifications") || "[]");
+      const notificationList = document.getElementById('notificationList');
+      
+      if (notifications.length > 0) {
+        document.getElementById('notificationBadge').classList.remove('hidden');
+        notificationList.innerHTML = notifications.map(notification => `
+          <div class="p-3 border-b border-gray-100 hover:bg-gray-50 rounded-lg">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 h-10 w-10 rounded-full ${notification.type === 'order' ? 'bg-green-100' : notification.type === 'user' ? 'bg-blue-100' : 'bg-yellow-100'} flex items-center justify-center mt-1">
+                <i class="${notification.type === 'order' ? 'fas fa-shopping-cart text-green-600' : notification.type === 'user' ? 'fas fa-user-plus text-blue-600' : 'fas fa-exclamation-circle text-yellow-600'}"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium">${notification.title}</p>
+                <p class="text-sm text-gray-500">${notification.message}</p>
+                <p class="text-xs text-gray-400 mt-1">${new Date(notification.timestamp).toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        notificationList.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No notifications yet</p>';
+      }
+    }
+
+    // Add notification
+    function addNotification(title, message, type = 'info') {
+      const notifications = JSON.parse(localStorage.getItem("notifications") || "[]");
+      const newNotification = {
+        id: Date.now(),
+        title,
+        message,
+        type,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      
+      notifications.unshift(newNotification);
+      localStorage.setItem("notifications", JSON.stringify(notifications));
+      
+      // Update UI
+      document.getElementById('notificationBadge').classList.remove('hidden');
+      loadNotifications();
+      
+      // Show toast notification
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: type === 'order' ? 'success' : type === 'user' ? 'info' : 'warning',
+        title: title,
+        text: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    }
+
+    // Check for updates
+    async function checkForUpdates() {
+      const prevUsers = JSON.parse(localStorage.getItem("users") || "[]").length;
+      const prevProducts = JSON.parse(localStorage.getItem("products") || "[]").length;
+      const prevOrders = JSON.parse(localStorage.getItem("orders") || "[]").length;
+      
+      const currentUsers = await getUsers();
+      const currentProducts = await getProducts();
+      const currentOrders = await getOrders();
+      
+      // Check for new users
+      if (currentUsers.length > prevUsers) {
+        const newUsersCount = currentUsers.length - prevUsers;
+        addNotification(
+          'New Users Registered',
+          `${newUsersCount} new user${newUsersCount > 1 ? 's' : ''} joined the platform`,
+          'user'
+        );
+      }
+      
+      // Check for new products
+      if (currentProducts.length > prevProducts) {
+        const newProductsCount = currentProducts.length - prevProducts;
+        addNotification(
+          'Products Updated',
+          `${newProductsCount} new product${newProductsCount > 1 ? 's' : ''} added to inventory`,
+          'info'
+        );
+      }
+      
+      // Check for new orders
+      if (currentOrders.length > prevOrders) {
+        const newOrdersCount = currentOrders.length - prevOrders;
+        addNotification(
+          'New Orders Received',
+          `${newOrdersCount} new order${newOrdersCount > 1 ? 's' : ''} placed`,
+          'order'
+        );
+      }
+    }
+
+    // Show notifications modal
+    function showNotifications() {
+      document.getElementById('notificationModal').classList.remove('hidden');
+      document.getElementById('notificationBadge').classList.add('hidden');
+      
+      // Mark notifications as read
+      const notifications = JSON.parse(localStorage.getItem("notifications") || "[]");
+      notifications.forEach(notification => notification.read = true);
+      localStorage.setItem("notifications", JSON.stringify(notifications));
+    }
+
+    // Show messages modal
+    function showMessages() {
+      Swal.fire({
+        title: 'Messages',
+        text: 'This would show your message inbox in a real implementation',
+        icon: 'info'
+      });
+    }
+
+    // Dashboard View
+    async function showDashboard() {
+      switchTab('dashboardTab');
+      document.getElementById('pageTitle').textContent = 'Dashboard';
+      
+      // Load data from external files
+      const users = await getUsers();
+      const products = await getProducts();
+      const orders = await getOrders();
+      
+      // Filter today's orders
+      const today = new Date().toISOString().split('T')[0];
+      const todaysOrders = orders.filter(order => order.date === today);
+      
+      // Calculate revenue
+      const revenue = orders.reduce((sum, order) => sum + order.amount, 0);
+      
+      // Sample data for dashboard
+      const stats = [
+        { title: "Total Users", value: users.length.toLocaleString(), icon: "users", color: "blue" },
+        { title: "Total Products", value: products.length.toLocaleString(), icon: "box", color: "green" },
+        { title: "Today's Orders", value: todaysOrders.length.toLocaleString(), icon: "shopping-cart", color: "yellow" },
+        { title: "Total Revenue", value: `₹${revenue.toLocaleString()}`, icon: "rupee-sign", color: "purple" }
+      ];
+      
+      let content = `
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          ${stats.map(stat => `
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-${stat.color}-500 card-hover">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="text-sm font-medium text-gray-500">${stat.title}</p>
+                  <p class="text-2xl font-semibold mt-1">${stat.value}</p>
+                </div>
+                <div class="bg-${stat.color}-100 p-3 rounded-full">
+                  <i class="fas fa-${stat.icon} text-${stat.color}-600"></i>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-lg shadow p-6 lg:col-span-2 card-hover">
+            <h3 class="text-lg font-semibold mb-4">Recent Orders</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  ${orders.slice(0, 5).map(order => `
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.id}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customer}</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹${order.amount.toLocaleString()}</td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800' : 
+                            order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
+                            'bg-gray-100 text-gray-800'}">
+                          ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-6 card-hover">
+            <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+            <div class="space-y-4">
+              <button onclick="showAddUserModal()" class="w-full flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition btn-spin">
+                <div class="bg-blue-100 p-3 rounded-full mr-4">
+                  <i class="fas fa-user-plus text-blue-600"></i>
+                </div>
+                <div class="text-left">
+                  <p class="font-medium">Add New User</p>
+                  <p class="text-sm text-gray-500">Create customer or staff account</p>
+                </div>
+              </button>
+              <button onclick="showAddProductModal()" class="w-full flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition btn-spin">
+                <div class="bg-green-100 p-3 rounded-full mr-4">
+                  <i class="fas fa-box-open text-green-600"></i>
+                </div>
+                <div class="text-left">
+                  <p class="font-medium">Add Product</p>
+                  <p class="text-sm text-gray-500">Add new fertilizer to inventory</p>
+                </div>
+              </button>
+              <button onclick="showAnalytics()" class="w-full flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition btn-spin">
+                <div class="bg-purple-100 p-3 rounded-full mr-4">
+                  <i class="fas fa-chart-pie text-purple-600"></i>
+                </div>
+                <div class="text-left">
+                  <p class="font-medium">View Reports</p>
+                  <p class="text-sm text-gray-500">Sales and performance analytics</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6 card-hover">
+          <h3 class="text-lg font-semibold mb-4">Sales Overview</h3>
+          <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Initialize chart
+      setTimeout(() => {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Sales (₹)',
+              data: [12500, 19000, 15000, 22000, 18000, 25000],
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 2,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }, 100);
+    }
+
+    // Show add user modal
+    function showAddUserModal() {
+      document.getElementById('addUserModal').classList.remove('hidden');
+    }
+
+    // Show add product modal
+    function showAddProductModal() {
+      document.getElementById('addProductModal').classList.remove('hidden');
+    }
+
+    // Add user form submission
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const newUser = {
+        id: Date.now().toString(),
+        name: document.getElementById('userName').value,
+        phone: document.getElementById('userPhone').value,
+        address: document.getElementById('userAddress').value,
+        role: document.getElementById('userRole').value,
+        joined: new Date().toISOString().split('T')[0],
+        password: document.getElementById('userPassword').value
+      };
+      
+      users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(users));
+      
+      // Also add to register.html data
+      const formData = JSON.parse(localStorage.getItem("formData") || "[]");
+      formData.push({
+        name: newUser.name,
+        phone: newUser.phone,
+        address: newUser.address,
+        password: newUser.password
+      });
+      localStorage.setItem("formData", JSON.stringify(formData));
+      
+      // Close modal
+      document.getElementById('addUserModal').classList.add('hidden');
+      
+      // Reset form
+      this.reset();
+      
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'User Added',
+        text: `${newUser.name} has been added successfully as ${newUser.role}`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      // Add notification
+      addNotification(
+        'New User Added',
+        `${newUser.name} (${newUser.role}) was added to the system`,
+        'user'
+      );
+      
+      // Refresh users view if currently active
+      if (document.getElementById('usersTab').classList.contains('active-tab')) {
+        showUsers();
+      }
+    });
+
+    // Add product form submission
+    document.getElementById('addProductForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const products = JSON.parse(localStorage.getItem("products") || "[]");
+      const newProduct = {
+        id: Date.now().toString(),
+        name: document.getElementById('productName').value,
+        category: document.getElementById('productCategory').value,
+        price: parseFloat(document.getElementById('productPrice').value),
+        stock: parseInt(document.getElementById('productStock').value),
+        description: document.getElementById('productDescription').value
+      };
+      
+      products.push(newProduct);
+      localStorage.setItem("products", JSON.stringify(products));
+      
+      // Also add to products.html data
+      const productData = JSON.parse(localStorage.getItem("productData") || "[]");
+      productData.push({
+        name: newProduct.name,
+        category: newProduct.category,
+        price: newProduct.price,
+        stock: newProduct.stock,
+        description: newProduct.description
+      });
+      localStorage.setItem("productData", JSON.stringify(productData));
+      
+      // Close modal
+      document.getElementById('addProductModal').classList.add('hidden');
+      
+      // Reset form
+      this.reset();
+      
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Product Added',
+        text: `${newProduct.name} has been added to inventory`,
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      // Add notification
+      addNotification(
+        'New Product Added',
+        `${newProduct.name} (${newProduct.category}) was added to inventory`,
+        'info'
+      );
+      
+      // Refresh products view if currently active
+      if (document.getElementById('productsTab').classList.contains('active-tab')) {
+        showProducts();
+      }
+    });
+
+    // Users View
+    async function showUsers() {
+      switchTab('usersTab');
+      document.getElementById('pageTitle').textContent = 'User Management';
+      
+      const users = await getUsers();
+      
+      let content = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">User Management</h3>
+          <button onclick="showAddUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition btn-spin">
+            <i class="fas fa-plus mr-2"></i> Add User
+          </button>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+          <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+            <div class="relative w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input type="text" id="userSearch" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm py-2 border 
+                     focus:ring-blue-500 focus:border-blue-500" placeholder="Search users...">
+            </div>
+            <div class="flex space-x-2">
+              <select id="userFilter" class="border rounded-md text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                <option value="all">All Roles</option>
+                <option value="customer">Customers</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admins</option>
+              </select>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                <i class="fas fa-download mr-1"></i> Export
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody" class="bg-white divide-y divide-gray-200">
+                ${users.length > 0 ? users.map(user => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">${user.name}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.phone}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.address || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                          user.role === 'staff' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-green-100 text-green-800'}">
+                        ${user.role}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.joined}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onclick="editUser('${user.id}')" class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteUser('${user.id}', '${user.name}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `).join('') : `
+                  <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No users found</td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              Showing <span class="font-medium">1</span> to <span class="font-medium">${users.length}</span> of <span class="font-medium">${users.length}</span> results
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 border rounded-md text-sm font-medium bg-gray-100 cursor-not-allowed" disabled>
+                Previous
+              </button>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Add search functionality
+      document.getElementById('userSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#userTableBody tr');
+        
+        rows.forEach(row => {
+          const name = row.querySelector('td:first-child').textContent.toLowerCase();
+          const phone = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+          const shouldShow = name.includes(searchTerm) || phone.includes(searchTerm);
+          row.style.display = shouldShow ? '' : 'none';
+        });
+      });
+      
+      // Add filter functionality
+      document.getElementById('userFilter').addEventListener('change', function() {
+        const filterValue = this.value;
+        const rows = document.querySelectorAll('#userTableBody tr');
+        
+        rows.forEach(row => {
+          if (filterValue === 'all') {
+            row.style.display = '';
+          } else {
+            const role = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+            row.style.display = role === filterValue ? '' : 'none';
+          }
+        });
+      });
+    }
+
+    // Edit user
+    function editUser(userId) {
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find(u => u.id === userId);
+      
+      if (!user) return;
+      
+      Swal.fire({
+        title: 'Edit User',
+        html: `
+          <div class="text-left space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input id="swal-name" value="${user.name}" class="swal2-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input id="swal-phone" value="${user.phone}" class="swal2-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea id="swal-address" class="swal2-input">${user.address || ''}</textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select id="swal-role" class="swal2-input">
+                <option value="customer" ${user.role === 'customer' ? 'selected' : ''}>Customer</option>
+                <option value="staff" ${user.role === 'staff' ? 'selected' : ''}>Staff</option>
+                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+              </select>
+            </div>
+          </div>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+          return {
+            name: document.getElementById('swal-name').value,
+            phone: document.getElementById('swal-phone').value,
+            address: document.getElementById('swal-address').value,
+            role: document.getElementById('swal-role').value
+          }
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Update in admin users
+          user.name = result.value.name;
+          user.phone = result.value.phone;
+          user.address = result.value.address;
+          user.role = result.value.role;
+          
+          localStorage.setItem("users", JSON.stringify(users));
+          
+          // Update in register.html data if exists
+          const formData = JSON.parse(localStorage.getItem("formData") || "[]");
+          const userIndex = formData.findIndex(u => u.phone === user.phone);
+          if (userIndex !== -1) {
+            formData[userIndex].name = result.value.name;
+            formData[userIndex].phone = result.value.phone;
+            formData[userIndex].address = result.value.address;
+            localStorage.setItem("formData", JSON.stringify(formData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'User Updated',
+            text: `${user.name}'s information has been updated`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showUsers();
+        }
+      });
+    }
+
+    // Delete user
+    function deleteUser(userId, userName) {
+      Swal.fire({
+        title: 'Delete User?',
+        text: `Are you sure you want to delete ${userName}? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const users = JSON.parse(localStorage.getItem("users") || "[]");
+          const user = users.find(u => u.id === userId);
+          const updatedUsers = users.filter(u => u.id !== userId);
+          
+          localStorage.setItem("users", JSON.stringify(updatedUsers));
+          
+          // Also remove from register.html data if exists
+          if (user) {
+            const formData = JSON.parse(localStorage.getItem("formData") || "[]");
+            const updatedFormData = formData.filter(u => u.phone !== user.phone);
+            localStorage.setItem("formData", JSON.stringify(updatedFormData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'User Deleted',
+            text: `${userName} has been removed from the system`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showUsers();
+        }
+      });
+    }
+
+    // Products View
+    async function showProducts() {
+      switchTab('productsTab');
+      document.getElementById('pageTitle').textContent = 'Product Management';
+      
+      const products = await getProducts();
+      
+      let content = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">Product Inventory</h3>
+          <button onclick="showAddProductModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition btn-spin">
+            <i class="fas fa-plus mr-2"></i> Add Product
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Products</p>
+                <p class="text-2xl font-semibold mt-1">${products.length}</p>
+              </div>
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="fas fa-boxes text-blue-600"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">In Stock</p>
+                <p class="text-2xl font-semibold mt-1">${products.reduce((sum, p) => sum + p.stock, 0)} kg</p>
+              </div>
+              <div class="bg-green-100 p-3 rounded-full">
+                <i class="fas fa-warehouse text-green-600"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Categories</p>
+                <p class="text-2xl font-semibold mt-1">${[...new Set(products.map(p => p.category))].length}</p>
+              </div>
+              <div class="bg-purple-100 p-3 rounded-full">
+                <i class="fas fa-tags text-purple-600"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+          <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+            <div class="relative w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input type="text" id="productSearch" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm py-2 border 
+                     focus:ring-blue-500 focus:border-blue-500" placeholder="Search products...">
+            </div>
+            <div class="flex space-x-2">
+              <select id="productFilter" class="border rounded-md text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                <option value="all">All Categories</option>
+                ${[...new Set(products.map(p => p.category))].map(category => `
+                  <option value="${category}">${category}</option>
+                `).join('')}
+              </select>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                <i class="fas fa-download mr-1"></i> Export
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody" class="bg-white divide-y divide-gray-200">
+                ${products.map(product => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                          <i class="fas fa-seedling text-gray-600"></i>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">${product.name}</div>
+                          <div class="text-sm text-gray-500">ID: ${product.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹${product.price}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.stock} kg</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${product.stock > 200 ? 'bg-green-100 text-green-800' : 
+                          product.stock > 50 ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'}">
+                        ${product.stock > 200 ? 'In Stock' : 
+                         product.stock > 50 ? 'Low Stock' : 
+                         'Critical Stock'}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onclick="editProduct('${product.id}')" class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                      <button onclick="deleteProduct('${product.id}', '${product.name}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              Showing <span class="font-medium">1</span> to <span class="font-medium">${products.length}</span> of <span class="font-medium">${products.length}</span> results
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 border rounded-md text-sm font-medium bg-gray-100 cursor-not-allowed" disabled>
+                Previous
+              </button>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Add search functionality
+      document.getElementById('productSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#productTableBody tr');
+        
+        rows.forEach(row => {
+          const name = row.querySelector('td:first-child').textContent.toLowerCase();
+          const category = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+          const shouldShow = name.includes(searchTerm) || category.includes(searchTerm);
+          row.style.display = shouldShow ? '' : 'none';
+        });
+      });
+      
+      // Add filter functionality
+      document.getElementById('productFilter').addEventListener('change', function() {
+        const filterValue = this.value;
+        const rows = document.querySelectorAll('#productTableBody tr');
+        
+        rows.forEach(row => {
+          if (filterValue === 'all') {
+            row.style.display = '';
+          } else {
+            const category = row.querySelector('td:nth-child(2)').textContent;
+            row.style.display = category === filterValue ? '' : 'none';
+          }
+        });
+      });
+    }
+
+    // Edit product
+    function editProduct(productId) {
+      const products = JSON.parse(localStorage.getItem("products") || "[]");
+      const product = products.find(p => p.id === productId);
+      
+      if (!product) return;
+      
+      Swal.fire({
+        title: 'Edit Product',
+        html: `
+          <div class="text-left space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input id="swal-name" value="${product.name}" class="swal2-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select id="swal-category" class="swal2-input">
+                <option value="Organic" ${product.category === 'Organic' ? 'selected' : ''}>Organic</option>
+                <option value="Chemical" ${product.category === 'Chemical' ? 'selected' : ''}>Chemical</option>
+                <option value="Natural" ${product.category === 'Natural' ? 'selected' : ''}>Natural</option>
+                <option value="Bio Fertilizers" ${product.category === 'Bio Fertilizers' ? 'selected' : ''}>Bio Fertilizers</option>
+                <option value="Liquid Fertilizers" ${product.category === 'Liquid Fertilizers' ? 'selected' : ''}>Liquid Fertilizers</option>
+                <option value="Micronutrient Mixes" ${product.category === 'Micronutrient Mixes' ? 'selected' : ''}>Micronutrient Mixes</option>
+                <option value="Soil Conditioners" ${product.category === 'Soil Conditioners' ? 'selected' : ''}>Soil Conditioners</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+              <input id="swal-price" type="number" value="${product.price}" class="swal2-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Stock (kg)</label>
+              <input id="swal-stock" type="number" value="${product.stock}" class="swal2-input">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea id="swal-description" class="swal2-input">${product.description || ''}</textarea>
+            </div>
+          </div>
+        `,
+        focusConfirm: false,
+        preConfirm: () => {
+          return {
+            name: document.getElementById('swal-name').value,
+            category: document.getElementById('swal-category').value,
+            price: parseFloat(document.getElementById('swal-price').value),
+            stock: parseInt(document.getElementById('swal-stock').value),
+            description: document.getElementById('swal-description').value
+          }
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Update in admin products
+          product.name = result.value.name;
+          product.category = result.value.category;
+          product.price = result.value.price;
+          product.stock = result.value.stock;
+          product.description = result.value.description;
+          
+          localStorage.setItem("products", JSON.stringify(products));
+          
+          // Update in products.html data if exists
+          const productData = JSON.parse(localStorage.getItem("productData") || "[]");
+          const productIndex = productData.findIndex(p => p.name === product.name);
+          if (productIndex !== -1) {
+            productData[productIndex] = {
+              ...productData[productIndex],
+              name: result.value.name,
+              category: result.value.category,
+              price: result.value.price,
+              stock: result.value.stock,
+              description: result.value.description
+            };
+            localStorage.setItem("productData", JSON.stringify(productData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Product Updated',
+            text: `${product.name} has been updated`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showProducts();
+        }
+      });
+    }
+
+    // Delete product
+    function deleteProduct(productId, productName) {
+      Swal.fire({
+        title: 'Delete Product?',
+        text: `Are you sure you want to delete ${productName}? This action cannot be undone.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const products = JSON.parse(localStorage.getItem("products") || "[]");
+          const product = products.find(p => p.id === productId);
+          const updatedProducts = products.filter(p => p.id !== productId);
+          
+          localStorage.setItem("products", JSON.stringify(updatedProducts));
+          
+          // Also remove from products.html data if exists
+          if (product) {
+            const productData = JSON.parse(localStorage.getItem("productData") || "[]");
+            const updatedProductData = productData.filter(p => p.name !== product.name);
+            localStorage.setItem("productData", JSON.stringify(updatedProductData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Product Deleted',
+            text: `${productName} has been removed from inventory`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showProducts();
+        }
+      });
+    }
+
+    // Orders View
+    async function showOrders() {
+      switchTab('ordersTab');
+      document.getElementById('pageTitle').textContent = 'Order Management';
+      
+      const orders = await getOrders();
+      
+      let content = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">Order Management</h3>
+          <div class="flex space-x-4">
+            <button class="px-4 py-2 border rounded-md text-sm font-medium hover:bg-gray-50">
+              <i class="fas fa-download mr-2"></i> Export
+            </button>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                <p class="text-2xl font-semibold mt-1">${orders.length}</p>
+              </div>
+              <div class="bg-blue-100 p-3 rounded-full">
+                <i class="fas fa-shopping-cart text-blue-600"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Completed</p>
+                <p class="text-2xl font-semibold mt-1">${orders.filter(o => o.status === 'delivered').length}</p>
+              </div>
+              <div class="bg-green-100 p-3 rounded-full">
+                <i class="fas fa-check-circle text-green-600"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">In Progress</p>
+                <p class="text-2xl font-semibold mt-1">${orders.filter(o => o.status === 'processing' || o.status === 'shipped').length}</p>
+              </div>
+              <div class="bg-yellow-100 p-3 rounded-full">
+                <i class="fas fa-shipping-fast text-yellow-600"></i>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500 card-hover">
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Pending</p>
+                <p class="text-2xl font-semibold mt-1">${orders.filter(o => o.status === 'pending').length}</p>
+              </div>
+              <div class="bg-red-100 p-3 rounded-full">
+                <i class="fas fa-exclamation-circle text-red-600"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+          <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+            <div class="relative w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input type="text" id="orderSearch" class="pl-10 block w-full rounded-md border-gray-300 shadow-sm py-2 border 
+                     focus:ring-blue-500 focus:border-blue-500" placeholder="Search orders...">
+            </div>
+            <div class="flex space-x-2">
+              <select id="orderFilter" class="border rounded-md text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+              </select>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                <i class="fas fa-filter mr-1"></i> Filter
+              </button>
+            </div>
+          </div>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orderTableBody" class="bg-white divide-y divide-gray-200">
+                ${orders.map(order => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customer}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹${order.amount}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-800' : 
+                          order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-gray-100 text-gray-800'}">
+                        ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onclick="viewOrderDetails('${order.id}')" class="text-blue-600 hover:text-blue-900 mr-3" title="View Details">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button onclick="updateOrderStatus('${order.id}')" class="text-green-600 hover:text-green-900 mr-3" title="Update Status">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button onclick="cancelOrder('${order.id}')" class="text-red-600 hover:text-red-900" title="Cancel Order">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="bg-gray-50 px-6 py-3 border-t flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+              Showing <span class="font-medium">1</span> to <span class="font-medium">${orders.length}</span> of <span class="font-medium">${orders.length}</span> results
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 border rounded-md text-sm font-medium bg-gray-100 cursor-not-allowed" disabled>
+                Previous
+              </button>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Add search functionality
+      document.getElementById('orderSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#orderTableBody tr');
+        
+        rows.forEach(row => {
+          const id = row.querySelector('td:first-child').textContent.toLowerCase();
+          const customer = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+          const shouldShow = id.includes(searchTerm) || customer.includes(searchTerm);
+          row.style.display = shouldShow ? '' : 'none';
+        });
+      });
+      
+      // Add filter functionality
+      document.getElementById('orderFilter').addEventListener('change', function() {
+        const filterValue = this.value;
+        const rows = document.querySelectorAll('#orderTableBody tr');
+        
+        rows.forEach(row => {
+          if (filterValue === 'all') {
+            row.style.display = '';
+          } else {
+            const status = row.querySelector('td:nth-child(5)').textContent.toLowerCase().trim();
+            row.style.display = status === filterValue ? '' : 'none';
+          }
+        });
+      });
+    }
+
+    // View order details
+    function viewOrderDetails(orderId) {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const order = orders.find(o => o.id === orderId);
+      
+      if (!order) return;
+      
+      Swal.fire({
+        title: `Order Details - ${orderId}`,
+        html: `
+          <div class="text-left space-y-3">
+            <div>
+              <p class="font-medium">Customer:</p>
+              <p>${order.customer}</p>
+            </div>
+            <div>
+              <p class="font-medium">Delivery Address:</p>
+              <p>${order.address || 'Not specified'}</p>
+            </div>
+            <div>
+              <p class="font-medium">Date:</p>
+              <p>${order.date}</p>
+            </div>
+            <div>
+              <p class="font-medium">Status:</p>
+              <p class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                ${order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                  order.status === 'shipped' ? 'bg-blue-100 text-blue-800' : 
+                  order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-gray-100 text-gray-800'}">
+                ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </p>
+            </div>
+            <div>
+              <p class="font-medium">Amount:</p>
+              <p>₹${order.amount}</p>
+            </div>
+            <div>
+              <p class="font-medium">Products:</p>
+              <ul class="list-disc pl-5">
+                ${order.products.map(product => `<li>${product}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `,
+        confirmButtonText: 'Close'
+      });
+    }
+
+    // Update order status
+    function updateOrderStatus(orderId) {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      const order = orders.find(o => o.id === orderId);
+      
+      if (!order) return;
+      
+      Swal.fire({
+        title: 'Update Order Status',
+        input: 'select',
+        inputOptions: {
+          'pending': 'Pending',
+          'processing': 'Processing',
+          'shipped': 'Shipped',
+          'delivered': 'Delivered',
+          'cancelled': 'Cancelled'
+        },
+        inputValue: order.status,
+        showCancelButton: true,
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You need to select a status!';
+          }
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Update in admin orders
+          order.status = result.value;
+          localStorage.setItem("orders", JSON.stringify(orders));
+          
+          // Update in invoice.html data if exists
+          const invoiceData = JSON.parse(localStorage.getItem("invoiceData") || "[]");
+          const invoiceIndex = invoiceData.findIndex(i => i.id === orderId);
+          if (invoiceIndex !== -1) {
+            invoiceData[invoiceIndex].status = result.value;
+            localStorage.setItem("invoiceData", JSON.stringify(invoiceData));
+          }
+          
+          // Update in checkout.html data if exists
+          const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "[]");
+          const checkoutIndex = checkoutData.findIndex(c => c.id === orderId);
+          if (checkoutIndex !== -1) {
+            checkoutData[checkoutIndex].status = result.value;
+            localStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Status Updated',
+            text: `Order ${orderId} is now ${result.value}`,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showOrders();
+        }
+      });
+    }
+
+    // Cancel order
+    function cancelOrder(orderId) {
+      Swal.fire({
+        title: 'Cancel Order?',
+        text: 'Are you sure you want to cancel this order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+          const order = orders.find(o => o.id === orderId);
+          const updatedOrders = orders.filter(o => o.id !== orderId);
+          
+          localStorage.setItem("orders", JSON.stringify(updatedOrders));
+          
+          // Also remove from invoice.html data if exists
+          if (order) {
+            const invoiceData = JSON.parse(localStorage.getItem("invoiceData") || "[]");
+            const updatedInvoiceData = invoiceData.filter(i => i.id !== orderId);
+            localStorage.setItem("invoiceData", JSON.stringify(updatedInvoiceData));
+          }
+          
+          // Also remove from checkout.html data if exists
+          if (order) {
+            const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "[]");
+            const updatedCheckoutData = checkoutData.filter(c => c.id !== orderId);
+            localStorage.setItem("checkoutData", JSON.stringify(updatedCheckoutData));
+          }
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Order Cancelled',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          showOrders();
+        }
+      });
+    }
+
+    // Analytics View
+    async function showAnalytics() {
+      switchTab('analyticsTab');
+      document.getElementById('pageTitle').textContent = 'Analytics & Reports';
+      
+      const users = await getUsers();
+      const products = await getProducts();
+      const orders = await getOrders();
+      
+      // Calculate analytics data
+      const monthlySales = Array(12).fill(0);
+      orders.forEach(order => {
+        const month = new Date(order.date).getMonth();
+        monthlySales[month] += order.amount;
+      });
+      
+      const productSales = {};
+      orders.forEach(order => {
+        order.products.forEach(productName => {
+          productSales[productName] = (productSales[productName] || 0) + 1;
+        });
+      });
+      
+      const userGrowth = Array(6).fill(0).map((_, i) => {
+        const date = new Date();
+        date.setMonth(date.getMonth() - (5 - i));
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        return users.filter(user => user.joined.startsWith(monthYear)).length;
+      });
+      
+      let content = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold">Business Analytics</h3>
+          <div class="flex space-x-4">
+            <select id="analyticsPeriod" class="border rounded-md text-sm py-2 px-3 focus:ring-blue-500 focus:border-blue-500">
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="year" selected>This Year</option>
+            </select>
+            <button class="px-4 py-2 border rounded-md text-sm font-medium hover:bg-gray-50">
+              <i class="fas fa-download mr-2"></i> Export Report
+            </button>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white rounded-lg shadow p-6 card-hover">
+            <h4 class="text-lg font-medium mb-4">Sales Performance</h4>
+            <div class="chart-container">
+              <canvas id="salesPerformanceChart"></canvas>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 card-hover">
+            <h4 class="text-lg font-medium mb-4">Product Distribution</h4>
+            <div class="chart-container">
+              <canvas id="productDistributionChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6 mb-6 card-hover">
+          <h4 class="text-lg font-medium mb-4">Top Selling Products</h4>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Units Sold</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Growth</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${Object.entries(productSales)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5)
+                  .map(([productName, sales]) => {
+                    const product = products.find(p => p.name === productName) || { category: 'Unknown', price: 0 };
+                    return `
+                      <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <i class="fas fa-seedling text-gray-600"></i>
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">${productName}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.category}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sales}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹${(sales * product.price).toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            <i class="fas fa-arrow-up mr-1"></i> ${Math.floor(Math.random() * 20) + 5}%
+                          </span>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white rounded-lg shadow p-6 card-hover">
+            <h4 class="text-lg font-medium mb-4">Customer Acquisition</h4>
+            <div class="chart-container">
+              <canvas id="customerAcquisitionChart"></canvas>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow p-6 md:col-span-2 card-hover">
+            <h4 class="text-lg font-medium mb-4">Recent Activities</h4>
+            <div id="activityList" class="space-y-4 max-h-96 overflow-y-auto">
+              <!-- Activities will be loaded here -->
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Load activities
+      loadActivities();
+      
+      // Initialize charts
+      setTimeout(() => {
+        // Sales Performance Chart
+        const salesCtx = document.getElementById('salesPerformanceChart').getContext('2d');
+        new Chart(salesCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+              label: 'Sales (₹)',
+              data: monthlySales,
+              backgroundColor: 'rgba(59, 130, 246, 0.7)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+        
+        // Product Distribution Chart
+        const productCtx = document.getElementById('productDistributionChart').getContext('2d');
+        const productLabels = Object.keys(productSales);
+        const productData = Object.values(productSales);
+        
+        new Chart(productCtx, {
+          type: 'doughnut',
+          data: {
+            labels: productLabels,
+            datasets: [{
+              data: productData,
+              backgroundColor: [
+                'rgba(59, 130, 246, 0.7)',
+                'rgba(16, 185, 129, 0.7)',
+                'rgba(245, 158, 11, 0.7)',
+                'rgba(139, 92, 246, 0.7)',
+                'rgba(20, 184, 166, 0.7)',
+                'rgba(244, 63, 94, 0.7)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+        
+        // Customer Acquisition Chart
+        const customerCtx = document.getElementById('customerAcquisitionChart').getContext('2d');
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+        
+        new Chart(customerCtx, {
+          type: 'line',
+          data: {
+            labels: monthNames,
+            datasets: [{
+              label: 'New Customers',
+              data: userGrowth,
+              fill: false,
+              backgroundColor: 'rgba(236, 72, 153, 0.7)',
+              borderColor: 'rgba(236, 72, 153, 1)',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }, 100);
+    }
+
+    // Activities View
+    async function showActivities() {
+      switchTab('activitiesTab');
+      document.getElementById('pageTitle').textContent = 'Activities Log';
+      
+      let content = `
+        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+          <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold">System Activities</h3>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                <i class="fas fa-download mr-1"></i> Export
+              </button>
+              <button class="px-3 py-1 border rounded-md text-sm font-medium hover:bg-gray-50">
+                <i class="fas fa-filter mr-1"></i> Filter
+              </button>
+            </div>
+          </div>
+          
+          <div id="fullActivityList" class="divide-y divide-gray-200 max-h-screen overflow-y-auto">
+            <!-- Activities will be loaded here -->
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      loadActivities(true);
+    }
+
+    // Load activities
+    function loadActivities(fullList = false) {
+      const activities = JSON.parse(localStorage.getItem("activities") || "[]");
+      const containerId = fullList ? 'fullActivityList' : 'activityList';
+      const container = document.getElementById(containerId);
+      
+      if (!container) return;
+      
+      if (activities.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No activities recorded yet</p>';
+        return;
+      }
+      
+      const activitiesToShow = fullList ? activities : activities.slice(0, 5);
+      
+      container.innerHTML = activitiesToShow.map(activity => `
+        <div class="p-4 hover:bg-gray-50">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 h-10 w-10 rounded-full ${getActivityColor(activity.type)} flex items-center justify-center mt-1">
+              <i class="${getActivityIcon(activity.type)}"></i>
+            </div>
+            <div class="ml-3 flex-1">
+              <div class="flex justify-between">
+                <p class="text-sm font-medium">${activity.title}</p>
+                <p class="text-xs text-gray-400">${new Date(activity.timestamp).toLocaleString()}</p>
+              </div>
+              <p class="text-sm text-gray-500">${activity.description}</p>
+              ${activity.details ? `<p class="text-xs text-gray-400 mt-1">${activity.details}</p>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Get activity icon
+    function getActivityIcon(type) {
+      switch(type) {
+        case 'user': return 'fas fa-user text-blue-600';
+        case 'order': return 'fas fa-shopping-cart text-green-600';
+        case 'product': return 'fas fa-box text-yellow-600';
+        case 'system': return 'fas fa-cog text-purple-600';
+        default: return 'fas fa-info-circle text-gray-600';
+      }
+    }
+
+    // Get activity color
+    function getActivityColor(type) {
+      switch(type) {
+        case 'user': return 'bg-blue-100';
+        case 'order': return 'bg-green-100';
+        case 'product': return 'bg-yellow-100';
+        case 'system': return 'bg-purple-100';
+        default: return 'bg-gray-100';
+      }
+    }
+
+    // Add activity
+    function addActivity(title, description, type = 'info', details = '') {
+      const activities = JSON.parse(localStorage.getItem("activities") || "[]");
+      const newActivity = {
+        id: Date.now(),
+        title,
+        description,
+        type,
+        details,
+        timestamp: new Date().toISOString()
+      };
+      
+      activities.unshift(newActivity);
+      localStorage.setItem("activities", JSON.stringify(activities));
+      
+      // Refresh activities view if currently active
+      if (document.getElementById('activitiesTab')?.classList.contains('active-tab')) {
+        showActivities();
+      }
+    }
+
+    // Settings View
+    function showSettings() {
+      switchTab('settingsTab');
+      document.getElementById('pageTitle').textContent = 'Settings';
+      
+      const settings = JSON.parse(localStorage.getItem("settings") || "{}");
+      
+      let content = `
+        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+          <div class="border-b border-gray-200">
+            <nav class="flex -mb-px" id="settingsTabs">
+              <button data-tab="general" class="settings-tab w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm border-blue-500 text-blue-600">
+                General
+              </button>
+              <button data-tab="security" class="settings-tab w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Security
+              </button>
+              <button data-tab="notifications" class="settings-tab w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Notifications
+              </button>
+              <button data-tab="advanced" class="settings-tab w-1/4 py-4 px-1 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                Advanced
+              </button>
+            </nav>
+          </div>
+          
+          <div class="p-6">
+            <form id="settingsForm">
+              <!-- General Settings -->
+              <div id="generalSettings" class="settings-content space-y-6">
+                <h4 class="text-lg font-medium mb-6">General Settings</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label for="company-name" class="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                    <input type="text" id="company-name" value="${settings.companyName || 'FertilizeX'}" 
+                      class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                  </div>
+                  <div>
+                    <label for="admin-email" class="block text-sm font-medium text-gray-700 mb-1">Admin Email</label>
+                    <input type="email" id="admin-email" value="${settings.adminEmail || 'admin@fertilizex.com'}" 
+                      class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                  </div>
+                </div>
+                
+                <div>
+                  <label for="company-address" class="block text-sm font-medium text-gray-700 mb-1">Company Address</label>
+                  <textarea id="company-address" rows="3" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">${settings.companyAddress || '123 Farm Street, Agricultural Zone, Bangalore, India - 560001'}</textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label for="currency" class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                    <select id="currency" 
+                      class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                      <option ${settings.currency === 'INR' ? 'selected' : ''}>Indian Rupee (₹)</option>
+                      <option ${settings.currency === 'USD' ? 'selected' : ''}>US Dollar ($)</option>
+                      <option ${settings.currency === 'EUR' ? 'selected' : ''}>Euro (€)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="timezone" class="block text-sm font-medium text-gray-700 mb-1">Timezone</label>
+                    <select id="timezone" 
+                      class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                      <option ${settings.timezone === 'Asia/Kolkata' ? 'selected' : ''}>Asia/Kolkata (IST)</option>
+                      <option ${settings.timezone === 'UTC' ? 'selected' : ''}>UTC</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Security Settings -->
+              <div id="securitySettings" class="settings-content space-y-6 hidden">
+                <h4 class="text-lg font-medium mb-6">Security Settings</h4>
+                
+                <div>
+                  <label for="password-strength" class="block text-sm font-medium text-gray-700 mb-1">Password Strength Requirement</label>
+                  <select id="password-strength" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                    <option ${settings.passwordStrength === 'low' ? 'selected' : ''}>Low (6+ characters)</option>
+                    <option ${settings.passwordStrength === 'medium' ? 'selected' : ''}>Medium (8+ characters with mix)</option>
+                    <option ${settings.passwordStrength === 'high' ? 'selected' : ''}>High (10+ characters with special chars)</option>
+                  </select>
+                </div>
+                
+                <div class="flex items-center">
+                  <input id="two-factor" name="two-factor" type="checkbox" 
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.twoFactorEnabled ? 'checked' : ''}>
+                  <label for="two-factor" class="ml-2 block text-sm text-gray-700">Enable Two-Factor Authentication</label>
+                </div>
+                
+                <div class="flex items-center">
+                  <input id="login-alerts" name="login-alerts" type="checkbox" 
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.loginAlerts ? 'checked' : ''}>
+                  <label for="login-alerts" class="ml-2 block text-sm text-gray-700">Email alerts for new logins</label>
+                </div>
+                
+                <div class="flex items-center">
+                  <input id="session-timeout" name="session-timeout" type="checkbox" 
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.sessionTimeout ? 'checked' : ''}>
+                  <label for="session-timeout" class="ml-2 block text-sm text-gray-700">Enable session timeout (30 minutes inactivity)</label>
+                </div>
+              </div>
+              
+              <!-- Notification Settings -->
+              <div id="notificationSettings" class="settings-content space-y-6 hidden">
+                <h4 class="text-lg font-medium mb-6">Notification Settings</h4>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Email Notifications</label>
+                  <div class="space-y-3">
+                    <div class="flex items-center">
+                      <input id="email-orders" name="email-orders" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.emailOrders ? 'checked' : ''}>
+                      <label for="email-orders" class="ml-2 block text-sm text-gray-700">New orders</label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="email-users" name="email-users" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.emailUsers ? 'checked' : ''}>
+                      <label for="email-users" class="ml-2 block text-sm text-gray-700">New user registrations</label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="email-products" name="email-products" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.emailProducts ? 'checked' : ''}>
+                      <label for="email-products" class="ml-2 block text-sm text-gray-700">Low stock alerts</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">In-App Notifications</label>
+                  <div class="space-y-3">
+                    <div class="flex items-center">
+                      <input id="app-orders" name="app-orders" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.appOrders ? 'checked' : ''}>
+                      <label for="app-orders" class="ml-2 block text-sm text-gray-700">Order updates</label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="app-system" name="app-system" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.appSystem ? 'checked' : ''}>
+                      <label for="app-system" class="ml-2 block text-sm text-gray-700">System alerts</label>
+                    </div>
+                    <div class="flex items-center">
+                      <input id="app-promotions" name="app-promotions" type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.appPromotions ? 'checked' : ''}>
+                      <label for="app-promotions" class="ml-2 block text-sm text-gray-700">Promotions</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label for="notification-sound" class="block text-sm font-medium text-gray-700 mb-1">Notification Sound</label>
+                  <select id="notification-sound" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                    <option ${settings.notificationSound === 'default' ? 'selected' : ''}>Default</option>
+                    <option ${settings.notificationSound === 'chime' ? 'selected' : ''}>Chime</option>
+                    <option ${settings.notificationSound === 'bell' ? 'selected' : ''}>Bell</option>
+                    <option ${settings.notificationSound === 'none' ? 'selected' : ''}>None</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Advanced Settings -->
+              <div id="advancedSettings" class="settings-content space-y-6 hidden">
+                <h4 class="text-lg font-medium mb-6">Advanced Settings</h4>
+                
+                <div class="flex items-center">
+                  <input id="maintenance-mode" name="maintenance-mode" type="checkbox" 
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" ${settings.maintenanceMode ? 'checked' : ''}>
+                  <label for="maintenance-mode" class="ml-2 block text-sm text-gray-700">Enable Maintenance Mode</label>
+                </div>
+                
+                <div>
+                  <label for="backup-frequency" class="block text-sm font-medium text-gray-700 mb-1">Database Backup Frequency</label>
+                  <select id="backup-frequency" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                    <option ${settings.backupFrequency === 'daily' ? 'selected' : ''}>Daily</option>
+                    <option ${settings.backupFrequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                    <option ${settings.backupFrequency === 'monthly' ? 'selected' : ''}>Monthly</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="log-retention" class="block text-sm font-medium text-gray-700 mb-1">Log Retention Period</label>
+                  <select id="log-retention" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                    <option ${settings.logRetention === '30' ? 'selected' : ''}>30 days</option>
+                    <option ${settings.logRetention === '90' ? 'selected' : ''}>90 days</option>
+                    <option ${settings.logRetention === '365' ? 'selected' : ''}>1 year</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="api-access" class="block text-sm font-medium text-gray-700 mb-1">API Access Level</label>
+                  <select id="api-access" 
+                    class="block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:ring-blue-500 focus:border-blue-500">
+                    <option ${settings.apiAccess === 'none' ? 'selected' : ''}>Disabled</option>
+                    <option ${settings.apiAccess === 'read' ? 'selected' : ''}>Read Only</option>
+                    <option ${settings.apiAccess === 'full' ? 'selected' : ''}>Full Access</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="pt-4 border-t border-gray-200 flex justify-end">
+                <button type="button" id="cancelSettings" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Cancel
+                </button>
+                <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('dashboardContent').innerHTML = content;
+      
+      // Setup settings tabs
+      document.querySelectorAll('.settings-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabName = this.dataset.tab;
+          
+          // Update active tab
+          document.querySelectorAll('.settings-tab').forEach(t => {
+            t.classList.remove('border-blue-500', 'text-blue-600');
+            t.classList.add('border-transparent', 'text-gray-500');
+          });
+          
+          this.classList.add('border-blue-500', 'text-blue-600');
+          this.classList.remove('border-transparent', 'text-gray-500');
+          
+          // Show corresponding content
+          document.querySelectorAll('.settings-content').forEach(content => {
+            content.classList.add('hidden');
+          });
+          
+          document.getElementById(`${tabName}Settings`).classList.remove('hidden');
+        });
+      });
+      
+      // Handle settings form submission
+      document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const settings = {
+          // General settings
+          companyName: document.getElementById('company-name').value,
+          adminEmail: document.getElementById('admin-email').value,
+          companyAddress: document.getElementById('company-address').value,
+          currency: document.getElementById('currency').value.split(' ')[0],
+          timezone: document.getElementById('timezone').value.split(' ')[0],
+          
+          // Security settings
+          passwordStrength: document.getElementById('password-strength').value,
+          twoFactorEnabled: document.getElementById('two-factor').checked,
+          loginAlerts: document.getElementById('login-alerts').checked,
+          sessionTimeout: document.getElementById('session-timeout').checked,
+          
+          // Notification settings
+          emailOrders: document.getElementById('email-orders').checked,
+          emailUsers: document.getElementById('email-users').checked,
+          emailProducts: document.getElementById('email-products').checked,
+          appOrders: document.getElementById('app-orders').checked,
+          appSystem: document.getElementById('app-system').checked,
+          appPromotions: document.getElementById('app-promotions').checked,
+          notificationSound: document.getElementById('notification-sound').value,
+          
+          // Advanced settings
+          maintenanceMode: document.getElementById('maintenance-mode').checked,
+          backupFrequency: document.getElementById('backup-frequency').value,
+          logRetention: document.getElementById('log-retention').value,
+          apiAccess: document.getElementById('api-access').value
+        };
+        
+        localStorage.setItem("settings", JSON.stringify(settings));
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Settings Saved',
+          text: 'Your settings have been updated successfully',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
+        // Add activity log
+        addActivity(
+          'Settings Updated',
+          'System settings were modified',
+          'system',
+          `Changed by: Admin User at ${new Date().toLocaleString()}`
+        );
+      });
+      
+      // Handle cancel button
+      document.getElementById('cancelSettings').addEventListener('click', function() {
+        Swal.fire({
+          title: 'Discard Changes?',
+          text: 'Are you sure you want to discard all unsaved changes?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Discard'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            showSettings(); // Reload settings without saving
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

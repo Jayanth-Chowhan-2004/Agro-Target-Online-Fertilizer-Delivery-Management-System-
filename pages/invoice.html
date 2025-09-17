@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invoice - FertilizeX</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+     body {
+      background: radial-gradient(circle at top left, #ecfccb, #d9f99d, #bbf7d0);
+      animation: bgAnimate 15s ease infinite alternate;
+      min-height: 100vh;
+    }
+    @keyframes bgAnimate {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-out both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .qr-code {
+      max-width: 150px;
+      margin-top: 0.5rem;
+      transition: opacity 0.3s ease;
+    }
+    .fade-visible {
+      opacity: 1 !important;
+      display: block !important;
+    }
+    .fade-hidden {
+      opacity: 0;
+      display: none !important;
+    }
+    input:focus, textarea:focus {
+      box-shadow: 0 0 8px 2px #22c55e;
+      outline: none;
+    }
+    .payment-option {
+      transition: max-height 0.4s ease, opacity 0.4s ease;
+      overflow: hidden;
+    }
+    /* Scrollbar for order summary */
+    #cartItems::-webkit-scrollbar {
+      width: 6px;
+    }
+    #cartItems::-webkit-scrollbar-thumb {
+      background-color: #22c55e;
+      border-radius: 3px;
+    }
+    .error-text {
+      color: #dc2626; /* red-600 */
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    .payment-logo {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .bank-info {
+      margin-top: 10px;
+      background-color: #d1fae5; /* green-100 */
+      padding: 10px;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #065f46; /* green-900 */
+    }
+    /* Digital signature box */
+    .signature-box {
+      width: 180px;
+      height: 80px;
+      border-bottom: 2px solid #065f46;
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: 600;
+      color: #065f46;
+      font-size: 1rem;
+      line-height: 80px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Navbar -->
+<nav class="w-full bg-green-700 text-white py-4 shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-6">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      🧾 <span>FertilizeX Invoice</span>
+    </h1>
+
+    <div class="flex items-center space-x-6" id="cartAndProductsWrapper">
+      <div class="relative" id="cartDropdownWrapper">
+        <button
+          id="cartToggleBtn"
+          class="relative text-white font-semibold flex items-center space-x-1 hover:underline focus:outline-none"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-label="Toggle Cart Preview"
+        >
+          <span class="text-2xl select-none">🛒</span>
+          <span>Cart</span>
+          <span
+            id="cartCount"
+            class="absolute -top-2 -right-6 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full select-none"
+          ></span>
+        </button>
+
+        <div
+          id="cartPreviewDropdown"
+          class="hidden absolute right-0 mt-2 w-72 max-h-72 overflow-auto bg-white border border-gray-300 rounded shadow-lg z-20"
+        >
+          <div id="cartPreviewItems" class="p-4 space-y-3 text-gray-700"></div>
+          <div class="border-t px-4 py-2 bg-green-50 text-center">
+            <a
+              href="products.html"
+              class="text-green-700 font-semibold hover:underline"
+              >Go to Products</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <a
+        href="products.html"
+        class="text-white font-semibold hover:bg-green-600 px-4 py-2 rounded transition"
+        title="Go to Products Page"
+      >
+        Go to Products
+      </a>
+    </div>
+  </div>
+</nav>
+
+  <!-- Invoice Body -->
+  <main class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-lg">
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h2 class="text-3xl font-bold text-green-700 mb-1">Invoice</h2>
+        <p><strong>Invoice ID:</strong> <span id="invoiceId"></span></p>
+        <p><strong>Date:</strong> <span id="invoiceDate"></span></p>
+      </div>
+      <!-- QR Code -->
+      <div>
+        <h3 class="text-xl font-semibold text-green-600 mb-2 text-center">Order QR Code</h3>
+        <img id="qrCode" class="qr-code rounded border shadow" alt="Order QR Code"/>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-green-600 mb-2">Billing Details</h3>
+      <p><strong>Name:</strong> <span id="billingName">-</span></p>
+      <p><strong>Email:</strong> <span id="billingEmail">-</span></p>
+      <p><strong>Phone:</strong> <span id="billingPhone">-</span></p>
+      <p><strong>Address:</strong> <span id="billingAddress">-</span></p>
+    </div>
+
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold text-green-600 mb-2">Transaction Details</h3>
+      <p><strong>Transaction ID:</strong> <span id="transactionId">-</span></p>
+      <p><strong>Payment Mode:</strong> <span id="paymentMode">-</span></p>
+      <p><strong>Status:</strong> <span id="paymentStatus">-</span></p>
+    </div>
+
+    <div>
+      <h3 class="text-xl font-semibold text-green-600 mb-3">Items</h3>
+      <table class="w-full text-left border">
+        <thead class="bg-green-100">
+          <tr>
+            <th class="px-4 py-2">Product</th>
+            <th class="px-4 py-2">Price</th>
+            <th class="px-4 py-2">Qty</th>
+            <th class="px-4 py-2">Total</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceItems" class="bg-white"></tbody>
+      </table>
+      <div class="text-right text-xl font-bold mt-4">
+        Grand Total: ₹<span id="grandTotal">0</span>
+      </div>
+    </div>
+
+    <!-- Digital Signature Section -->
+    <div class="mt-10 flex justify-end">
+      <div class="signature-box">
+        Authorized Signature
+      </div>
+    </div>
+
+    <div class="flex gap-4 mt-8">
+      <button onclick="window.print()" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700">
+        🖨️ Print Invoice
+      </button>
+      <button onclick="downloadPDF()" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
+        📄 Download PDF
+      </button>
+    </div>
+  </main>
+
+  <script>
+    // Product images map
+    const productImages = {
+      "Urea": "../images/urea.jpg",
+      "DAP": "../images/DAP.jpg",
+      "Potash": "../images/Potash.jpg",
+      "Compost": "../images/Compost.jpg",
+      "NPK 20-20-20": "../images/NPK.jpg",
+      "Ammonium Sulfate": "../images/Ammonium Sulphate.jpg",
+      "Calcium Nitrate": "../images/calcium nitrate.jpg",
+      "Magnesium Sulfate": "../images/Magnesium Sulfate.jpg",
+      "Rock Phosphate": "../images/Rock Phosphate.jpg",
+      "Gypsum": "../images/Gypsum.jpg",
+      "Humic Acid": "../images/Humic acid.jpg",
+      "Kelp Extract": "../images/Kelp Extract.jpg",
+      "Azospirillum": "../images/Azospirillum.jpg",
+      "Rhizobium": "../images/Rhizobium.jpg",
+      "Bacillus Thuringiensis": "../images/bacillus thuringiensis.jpg",
+      "Liquid Urea": "../images/Liquid Urea.jpg",
+      "Liquid NPK 20-10-10": "../images/Liquid NPK-20-10-10.jpg",
+      "Seaweed Liquid": "../images/Seaweed Liquid.jpg",
+      "Borax": "../images/Borax.jpg",
+      "Zinc Sulfate": "../images/Zinc Sulfate.jpg",
+      "Chelated Iron": "../images/Chelated Iron.jpg",
+      "Cow Manure": "../images/Cow Manure.jpg",
+      "Poultry Manure": "../images/Poultry Manure.jpg",
+      "Vermicompost": "../images/Vermicompost.jpg",
+      "Biochar": "../images/Bio Char.jpg",
+      "Superphosphate": "../images/Super Phosphate.jpg",
+      "Urea Formaldehyde": "../images/urea formaldehyde.jpg",
+      "Muriate of Potash": "../images/Muriate of Potash.jpg",
+      "Sulphate of Potash": "../images/Sulphate of Potash.jpg",
+      "Dolomite Lime": "../images/Dolomite Lime.jpg"
+    };
+
+    // Helper to generate random transaction ID
+    function generateTransactionId() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let id = 'TXN';
+      for (let i = 0; i < 10; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return id;
+    }
+
+    // Retrieve saved data or initialize empty/defaults
+    let billing = JSON.parse(localStorage.getItem("billingInfo")) || {};
+    let transaction = JSON.parse(localStorage.getItem("transactionDetails")) || {};
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Fix product name if it is object, use its name property or fallback string
+    function getProductName(item) {
+      if (typeof item.name === "object" && item.name !== null) {
+        // If name is an object, try to get the 'en' property or first available string
+        return item.name.en || Object.values(item.name).find(val => typeof val === "string") || "Unnamed Product";
+      }
+      return item.name || "Unnamed Product";
+    }
+
+    // If transactionDetails doesn't have a transactionId, generate and save it
+    if (!transaction.transactionId) {
+      transaction.transactionId = generateTransactionId();
+    }
+
+    // If paymentMode missing, try to infer or set default "Unknown"
+    if (!transaction.paymentMode) {
+      transaction.paymentMode = billing.paymentMethod || "Unknown";
+    }
+
+    // Determine payment status automatically
+    const payModeLower = transaction.paymentMode.toLowerCase();
+    if (payModeLower === "cash" || payModeLower === "cod" || payModeLower === "cash on delivery") {
+      transaction.paymentStatus = "Not Paid";
+    } else {
+      transaction.paymentStatus = "Paid";
+    }
+
+    // Save updated transactionDetails back to localStorage
+    localStorage.setItem("transactionDetails", JSON.stringify(transaction));
+
+    // Set invoice ID and date (once per session)
+    const invoiceIdEl = document.getElementById("invoiceId");
+    const invoiceDateEl = document.getElementById("invoiceDate");
+    const now = new Date();
+    let sessionInvoiceId = sessionStorage.getItem("invoiceId");
+    if (!sessionInvoiceId) {
+      sessionInvoiceId = "INV-" + now.getTime();
+      sessionStorage.setItem("invoiceId", sessionInvoiceId);
+    }
+    invoiceIdEl.textContent = sessionInvoiceId;
+    invoiceDateEl.textContent = now.toLocaleString();
+
+    // Fill billing info
+    document.getElementById("billingName").textContent = billing.name || "-";
+    document.getElementById("billingEmail").textContent = billing.email || "-";
+    document.getElementById("billingPhone").textContent = billing.phone || "-";
+    document.getElementById("billingAddress").textContent = billing.address || "-";
+
+    // Fill transaction info
+    document.getElementById("transactionId").textContent = transaction.transactionId || "-";
+    document.getElementById("paymentMode").textContent = transaction.paymentMode || "-";
+    document.getElementById("paymentStatus").textContent = transaction.paymentStatus || "-";
+
+    // Fill cart count
+    const cartCount = document.getElementById("cartCount");
+    cartCount.textContent = cart.length;
+
+    // Render cart preview dropdown
+    const cartPreview = document.getElementById("cartPreviewItems");
+    function renderCartPreview() {
+      if (cart.length === 0) {
+        cartPreview.innerHTML = `<p class="text-center text-gray-500">Cart is empty</p>`;
+      } else {
+        cartPreview.innerHTML = "";
+        cart.forEach(item => {
+          const prodName = getProductName(item);
+          const imgSrc = productImages[prodName] || "https://via.placeholder.com/48?text=No+Image";
+          cartPreview.innerHTML += `
+            <div class="flex items-center space-x-3 border-b border-gray-200 pb-2 last:border-b-0">
+              <img src="${imgSrc}" alt="${prodName}" class="w-12 h-12 object-cover rounded" />
+              <div class="flex-1 text-sm">
+                <div class="font-semibold text-green-700">${prodName}</div>
+                <div>Qty: ${item.quantity}</div>
+              </div>
+              <div class="font-semibold text-gray-700">₹${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+          `;
+        });
+      }
+    }
+    renderCartPreview();
+
+    // Render invoice items table
+    const invoiceItemsEl = document.getElementById("invoiceItems");
+    let total = 0;
+    invoiceItemsEl.innerHTML = "";
+    cart.forEach(item => {
+      const prodName = getProductName(item);
+      const cost = item.price * item.quantity;
+      total += cost;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="border px-4 py-2">${prodName}</td>
+        <td class="border px-4 py-2">₹${item.price}</td>
+        <td class="border px-4 py-2">${item.quantity}</td>
+        <td class="border px-4 py-2 font-semibold">₹${cost.toFixed(2)}</td>
+      `;
+      invoiceItemsEl.appendChild(row);
+    });
+    document.getElementById("grandTotal").textContent = total.toFixed(2);
+
+    // Dropdown toggle button event
+    const toggleBtn = document.getElementById("cartToggleBtn");
+    const dropdown = document.getElementById("cartPreviewDropdown");
+    const wrapper = document.getElementById("cartDropdownWrapper");
+
+    toggleBtn.addEventListener("click", () => {
+      const isHidden = dropdown.classList.contains("hidden");
+      if (isHidden) {
+        dropdown.classList.remove("hidden");
+        toggleBtn.setAttribute("aria-expanded", "true");
+      } else {
+        dropdown.classList.add("hidden");
+        toggleBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener("click", (e) => {
+      if (!wrapper.contains(e.target)) {
+        dropdown.classList.add("hidden");
+        toggleBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    // Clear localStorage after printing
+    window.onafterprint = () => {
+      localStorage.removeItem("cart");
+      localStorage.removeItem("billingInfo");
+      localStorage.removeItem("transactionDetails");
+      sessionStorage.removeItem("invoiceId");
+    };
+
+    // Generate QR Code URL (Google Charts)
+    const qrCodeEl = document.getElementById("qrCode");
+    const qrText = `InvoiceID: ${sessionInvoiceId} | Transaction: ${transaction.transactionId || ''} | Total: ₹${total.toFixed(2)}`;
+    qrCodeEl.src = `https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=${encodeURIComponent(qrText)}&chld=L|0`;
+
+    // PDF generation function (basic)
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("FertilizeX Invoice", 14, 20);
+
+      doc.setFontSize(12);
+      doc.text(`Invoice ID: ${sessionInvoiceId}`, 14, 30);
+      doc.text(`Date: ${now.toLocaleString()}`, 14, 36);
+      doc.text(`Billing Name: ${billing.name || '-'}`, 14, 42);
+      doc.text(`Email: ${billing.email || '-'}`, 14, 48);
+      doc.text(`Phone: ${billing.phone || '-'}`, 14, 54);
+      doc.text(`Address: ${billing.address || '-'}`, 14, 60);
+
+      doc.text("Items:", 14, 70);
+
+      let yPos = 76;
+      cart.forEach(item => {
+        const prodName = getProductName(item);
+        const line = `${prodName} - ₹${item.price} x ${item.quantity} = ₹${(item.price * item.quantity).toFixed(2)}`;
+        doc.text(line, 14, yPos);
+        yPos += 6;
+      });
+
+      doc.text(`Grand Total: ₹${total.toFixed(2)}`, 14, yPos + 4);
+
+      doc.save(`Invoice_${sessionInvoiceId}.pdf`);
+    }
+  </script>
+</body>
+</html>

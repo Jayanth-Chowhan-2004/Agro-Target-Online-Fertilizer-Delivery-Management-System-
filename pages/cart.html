@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FertilizeX - Cart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .fade-out {
+      animation: fadeOut 0.4s ease-in forwards;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: translateX(40px);
+        height: 0;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-tr from-green-100 via-white to-green-200 text-gray-800">
+
+  <div class="max-w-7xl mx-auto p-6">
+    <h2 class="text-4xl font-bold mb-10 text-center text-green-800">🛒 Your Shopping Cart</h2>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-in">
+      <!-- Cart Items -->
+      <div class="lg:col-span-2 space-y-6" id="cartItems"></div>
+
+      <!-- Order Summary -->
+      <div class="glass p-6 rounded-2xl shadow-2xl backdrop-blur-md">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Order Summary</h3>
+        <div class="flex justify-between text-lg mb-2">
+          <span class="font-medium text-gray-700">Total Amount</span>
+          <span class="text-green-700 font-bold text-xl">₹<span id="totalAmount">0</span></span>
+        </div>
+        <button onclick="checkout()" class="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold text-lg transition-transform hover:scale-105">
+          Proceed to Checkout
+        </button>
+        <a href="products.html" class="block text-center mt-4 text-green-700 hover:underline font-medium">← Back to Products</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fertilizerImages = {
+  "Urea": "../images/urea.jpg",
+  "DAP": "../images/DAP.jpg",
+  "Potash": "../images/Potash.jpg",
+  "Compost": "../images/Compost.jpg",
+  "NPK 20-20-20": "../images/NPK.jpg",
+  "Ammonium Sulfate": "../images/Ammonium Sulphate.jpg",
+  "Calcium Nitrate": "../images/calcium nitrate.jpg",
+  "Magnesium Sulfate": "../images/Magnesium Sulfate.jpg",
+  "Rock Phosphate": "../images/Rock Phosphate.jpg",
+  "Gypsum": "../images/Gypsum.jpg",
+  "Humic Acid": "../images/Humic acid.jpg",
+  "Kelp Extract": "../images/Kelp Extract.jpg",
+  "Azospirillum": "../images/Azospirillum.jpg",
+  "Rhizobium": "../images/Rhizobium.jpg",
+  "Bacillus Thuringiensis": "../images/bacillus thuringiensis.jpg",
+  "Liquid Urea": "../images/Liquid Urea.jpg",
+  "Liquid NPK 20-10-10": "../images/Liquid NPK-20-10-10.jpg",
+  "Seaweed Liquid": "../images/Seaweed Liquid.jpg",
+  "Borax": "../images/Borax.jpg",
+  "Zinc Sulfate": "../images/Zinc Sulfate.jpg",
+  "Chelated Iron": "../images/Chelated Iron.jpg",
+  "Cow Manure": "../images/Cow Manure.jpg",
+  "Poultry Manure": "../images/Poultry Manure.jpg",
+  "Vermicompost": "../images/Vermicompost.jpg",
+  "Biochar": "../images/Bio Char.jpg",
+  "Superphosphate": "../images/Super Phosphate.jpg",
+  "Urea Formaldehyde": "../images/urea formaldehyde.jpg",
+  "Muriate of Potash": "../images/Muriate of Potash.jpg",
+  "Sulphate of Potash": "../images/Sulphate of Potash.jpg",
+  "Dolomite Lime": "../images/Dolomite Lime.jpg",
+    };
+
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartContainer = document.getElementById("cartItems");
+      const totalAmount = document.getElementById("totalAmount");
+      cartContainer.innerHTML = "";
+      let total = 0;
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = `
+          <div class="glass p-6 rounded-xl text-center text-gray-600 shadow-xl">
+            <p class="text-xl font-medium">Your cart is empty. Start shopping!</p>
+          </div>`;
+        totalAmount.textContent = "0";
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const productName = item.name.en || item.name; // fallback in case it's string
+        const imageUrl = item.image || fertilizerImages[productName] || "https://via.placeholder.com/150";
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+
+        const itemCard = document.createElement("div");
+        itemCard.className = "glass p-4 rounded-2xl shadow-xl flex flex-col sm:flex-row gap-4 items-start fade-in";
+        itemCard.setAttribute("data-index", index);
+
+        itemCard.innerHTML = `
+          <img src="${imageUrl}" alt="${item.name}" class="w-28 h-28 object-cover rounded-xl border shadow-md" />
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-green-800">${productName}</h3>
+            <p class="text-gray-700 mt-1">Price: ₹${item.price}</p>
+            <label class="block mt-2">
+              <span class="text-sm text-gray-500">Quantity:</span>
+              <select onchange="updateQuantity(${index}, this.value)" class="mt-1 border rounded px-2 py-1">
+                ${Array.from({ length: 10 }, (_, i) => i + 1)
+                  .map(q => `<option value="${q}" ${q === item.quantity ? 'selected' : ''}>${q}</option>`).join("")}
+              </select>
+            </label>
+            <p class="mt-2 font-bold text-gray-900">Subtotal: ₹${subtotal}</p>
+          </div>
+          <div class="self-center sm:self-start">
+            <button onclick="removeItem(${index})"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md text-sm transition duration-300">
+              Remove
+            </button>
+          </div>
+        `;
+        cartContainer.appendChild(itemCard);
+      });
+
+      totalAmount.textContent = total;
+    }
+
+    function updateQuantity(index, newQty) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart[index].quantity = parseInt(newQty);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+
+    function removeItem(index) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const card = document.querySelector(`[data-index="${index}"]`);
+      if (card) {
+        card.classList.add("fade-out");
+        setTimeout(() => {
+          cart.splice(index, 1);
+          localStorage.setItem("cart", JSON.stringify(cart));
+          renderCart();
+        }, 400);
+      }
+    }
+
+    function checkout() {
+      window.location.href = "checkout.html";
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

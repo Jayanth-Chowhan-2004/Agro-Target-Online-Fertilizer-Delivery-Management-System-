@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Products - FertilizeX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-image: url('https://images.unsplash.com/photo-1582192720907-d72a4a3b7b1b?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      transition: all 0.5s ease;
+    }
+    .light-theme {
+      background: linear-gradient(135deg, #000000 0%, #16213E 50%, #1A1A2E 100%);
+      color: #ffffff;
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Theme toggle styles */
+    .theme-toggle {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      background: linear-gradient(90deg, #333 50%, #1A1A2E 50%);
+    }
+    
+    .theme-toggle-inner {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+      color: #ffd700;
+    }
+    
+    .theme-toggle.dark .theme-toggle-inner {
+      transform: translateX(30px);
+      background: #1A1A2E;
+      color: #E94560;
+    }
+    
+    .theme-toggle.light .theme-toggle-inner {
+      transform: translateX(0);
+      background: #E94560;
+      color: #0F3460;
+    }
+    
+    .theme-toggle-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #333 50%, #1A1A2E 50%);
+      transition: all 0.3s ease;
+    }
+    
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      transform: translateX(200%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.success {
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .notification.warning {
+      border-left: 4px solid #E94560;
+    }
+    
+    .decrease-btn {
+      background-color: #E94560;
+      color: white;
+    }
+    
+    .decrease-btn:hover {
+      background-color: #c2334d;
+    }
+    
+    .decrease-btn:disabled {
+      background-color: #cccccc;
+      color: #666666;
+    }
+    
+    /* Navigation styles */
+    .nav-link {
+      transition: all 0.3s ease;
+    }
+    .nav-link:hover {
+      color: #4ade80;
+      transform: translateY(-2px);
+    }
+    
+    /* Chatbot styles */
+    .chatbot-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 350px;
+      max-height: 500px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .chatbot-header {
+      background: #4CAF50;
+      color: white;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .chatbot-messages {
+      flex-grow: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      color: #333;
+    }
+    
+    .chatbot-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #eee;
+      background: white;
+    }
+    
+    .chatbot-input input {
+      flex-grow: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-right: 8px;
+      color: #333; /* Added for visible text */
+    }
+    
+    .chatbot-input button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    
+    .chatbot-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: #4CAF50;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 1001;
+    }
+    
+    .message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      max-width: 80%;
+    }
+    
+    .user-message {
+      background: #e3f2fd;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .bot-message {
+      background: #f1f1f1;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .language-selector {
+      position: fixed;
+      top: 4px;
+      left: 4px;
+      z-index: 50;
+    }
+    
+    .language-selector select {
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: #333;
+      color: white;
+      border: none;
+    }
+    
+    /* Loading spinner */
+    .spinner {
+      border: 3px solid rgba(0,0,0,0.1);
+      border-radius: 50%;
+      border-top: 3px solid #4CAF50;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-black/70 text-white" id="pageBody">
+
+  <!-- Notification System -->
+  <div id="notification" class="notification">
+    <span id="notification-message"></span>
+  </div>
+
+  <!-- Language Selector -->
+  <div class="language-selector">
+    <select id="languageSelect" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="te">తెలుగు</option>
+    </select>
+  </div>
+
+  <!-- Theme Toggle -->
+  <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
+    <span class="text-xs hidden sm:inline" id="darkLabel">Dark</span>
+    <div id="themeToggle" class="theme-toggle dark" onclick="toggleTheme()">
+      <div class="theme-toggle-bg"></div>
+      <div class="theme-toggle-inner">🌙</div>
+    </div>
+    <span class="text-xs hidden sm:inline" id="lightLabel">Light</span>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="bg-black/80 py-4 px-6 shadow-lg sticky top-0 z-40 backdrop-blur-sm">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <a href="../index.html" class="text-2xl font-bold text-green-400">FertilizeX</a>
+      <div class="flex gap-6">
+        <a href="../index.html" class="nav-link" id="homeLink">Home</a>
+        <a href="cart.html" class="nav-link" id="cartLink">Cart</a>
+        <a href="checkout.html" class="nav-link" id="checkoutLink">Checkout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto p-6">
+    <h2 class="text-3xl font-bold mb-6 text-center text-green-400 fade-in" id="catalogTitle">Fertilizer Catalog</h2>
+
+    <!-- Filter + Search -->
+    <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+      <select id="categoryFilter" onchange="applyFilters()" class="text-black px-4 py-2 rounded">
+        <option value="all" id="allCategories">All Categories</option>
+        <option value="organic" id="organicCat">Organic</option>
+        <option value="chemical" id="chemicalCat">Chemical</option>
+        <option value="natural" id="naturalCat">Natural</option>
+        <option value="bio" id="bioCat">Bio Fertilizers</option>
+        <option value="liquid" id="liquidCat">Liquid Fertilizers</option>
+        <option value="micronutrient" id="micronutrientCat">Micronutrient Mixes</option>
+        <option value="soil-conditioner" id="soilCat">Soil Conditioners</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="Search for fertilizers..." class="text-black px-4 py-2 rounded w-full md:w-2/3" oninput="applyFilters()">
+    </div>
+
+    <!-- Products -->
+    <div id="productList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center mt-10 gap-4 text-white"></div>
+
+    <!-- Checkout -->
+    <div class="mt-10 text-center">
+      <a href="cart.html" class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
+        <span id="goToCart">Go to Cart</span> 🛒 (<span id="cart-count">0</span>)
+      </a>
+    </div>
+  </div>
+
+  <!-- Chatbot Toggle -->
+  <div class="chatbot-toggle" onclick="toggleChatbot()">
+    <span id="chatbotIcon">💬</span>
+  </div>
+
+  <!-- Chatbot Container -->
+  <div class="chatbot-container" id="chatbotContainer">
+    <div class="chatbot-header">
+      <span id="chatbotTitle">Pochamma Assistant</span>
+      <button onclick="toggleChatbot()" id="closeChatbot">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="message bot-message" id="welcomeMessage">
+        Hi! I'm Pochamma. How can I help you today?
+      </div>
+    </div>
+    <div class="chatbot-input">
+      <input type="text" id="chatbotInput" placeholder="Type your question..." onkeypress="handleChatbotInput(event)">
+      <button onclick="sendChatbotMessage()" id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // Language translations
+    const translations = {
+      en: {
+        darkLabel: "Dark",
+        lightLabel: "Light",
+        homeLink: "Home",
+        cartLink: "Cart",
+        checkoutLink: "Checkout",
+        catalogTitle: "Fertilizer Catalog",
+        allCategories: "All Categories",
+        organicCat: "Organic",
+        chemicalCat: "Chemical",
+        naturalCat: "Natural",
+        bioCat: "Bio Fertilizers",
+        liquidCat: "Liquid Fertilizers",
+        micronutrientCat: "Micronutrient Mixes",
+        soilCat: "Soil Conditioners",
+        goToCart: "Go to Cart",
+        chatbotTitle: "Pochamma Assistant",
+        welcomeMessage: "Hi! I'm Pochamma. How can I help you today?",
+        sendButton: "Send",
+        closeChatbot: "✕",
+        chatbotPlaceholder: "Type your question...",
+        cartAdd: "Added to cart",
+        cartRemove: "Removed from cart",
+        cartUpdate: "Quantity updated",
+        notificationAdd: "Added {product} to cart",
+        notificationRemove: "Removed {product} from cart",
+        notificationUpdate: "Updated {product} quantity to {quantity}",
+        usageTitle: "Usage Instructions:",
+        priceSymbol: "₹"
+      },
+      te: {
+        darkLabel: "చీకటి",
+        lightLabel: "కాంతి",
+        homeLink: "హోమ్",
+        cartLink: "కార్ట్",
+        checkoutLink: "చెక్అవుట్",
+        catalogTitle: "ఎరువుల కేటలాగ్",
+        allCategories: "అన్ని వర్గాలు",
+        organicCat: "సేంద్రీయ",
+        chemicalCat: "రసాయన",
+        naturalCat: "సహజ",
+        bioCat: "బయో ఎరువులు",
+        liquidCat: "ద్రవ ఎరువులు",
+        micronutrientCat: "సూక్ష్మ పోషకాలు",
+        soilCat: "నేల కండిషనర్లు",
+        goToCart: "కార్ట్‌కు వెళ్లండి",
+        chatbotTitle: "పోచమ్మ అసిస్టెంట్",
+        welcomeMessage: "హాయ్! నేను పోచమ్మ. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?",
+        sendButton: "పంపండి",
+        closeChatbot: "✕",
+        chatbotPlaceholder: "మీ ప్రశ్నను టైప్ చేయండి...",
+        cartAdd: "కార్ట్‌కు జోడించబడింది",
+        cartRemove: "కార్ట్ నుండి తీసివేయబడింది",
+        notificationAdd: "{product} కార్ట్‌కు జోడించబడింది",
+        notificationRemove: "{product} కార్ట్ నుండి తీసివేయబడింది",
+        notificationUpdate: "{product} పరిమాణం {quantity}కి నవీకరించబడింది",
+        usageTitle: "వినియోగ సూచనలు:",
+        priceSymbol: "₹"
+      }
+    };
+
+    // Current language
+    let currentLanguage = localStorage.getItem('language') || 'en';
+
+    // Change language function
+    function changeLanguage() {
+      currentLanguage = document.getElementById('languageSelect').value;
+      localStorage.setItem('language', currentLanguage);
+      applyTranslations();
+      applyFilters(); // Re-render products with new language
+    }
+
+    // Apply translations to the page
+    function applyTranslations() {
+      document.getElementById('languageSelect').value = currentLanguage;
+      
+      for (const [key, value] of Object.entries(translations[currentLanguage])) {
+        const element = document.getElementById(key);
+        if (element) {
+          if (key === 'chatbotPlaceholder') {
+            document.getElementById('chatbotInput').placeholder = value;
+          } else {
+            element.textContent = value;
+          }
+        }
+      }
+    }
+
+    // Chatbot functionality
+    const chatbotResponses = {
+      en: {
+        "products": "We offer a wide range of fertilizers including organic, chemical, and bio-fertilizers. You can browse our catalog above.",
+        "checkout": "You can proceed to checkout by clicking the 'Go to Cart' button and then 'Proceed to Checkout'.",
+        "billing": "For billing issues, please check your order details in the checkout page or contact our support at support@fertilizex.com.",
+        "invoice": "You can download your invoice from the order confirmation page or from your account section after purchase.",
+        "usage": "Each fertilizer has specific usage instructions. Please check the 'Usage Instructions' section in each product card for detailed information.",
+        "rice": "For rice crops: Apply urea (100-150kg/acre) in 3 splits (basal, tillering, panicle initiation), DAP (50kg/acre) at planting, and potash (40kg/acre) during tillering. Maintain proper water management.",
+        "cotton": "For cotton: Apply 100kg urea, 50kg DAP, and 50kg potash per acre in splits during growth stages. First dose at sowing, second at squaring, third at flowering.",
+        "tomato": "For tomatoes: Use NPK 19:19:19 (75kg/acre) during growth, calcium nitrate (5kg/acre) for fruit quality, and micronutrient sprays (Zn, B) every 15 days.",
+        "payment": "We accept all major credit/debit cards, UPI, Net Banking, and cash on delivery. Your payment information is securely processed.",
+        "delivery": "Standard delivery takes 3-5 business days. Express delivery available for metro cities (1-2 days). Free shipping on orders above ₹2000.",
+        "organic": "Our organic fertilizers include compost, vermicompost, cow manure, and bio-fertilizers like Rhizobium. They improve soil health and provide slow-release nutrients.",
+        "contact": "You can reach us at support@fertilizex.com or call +91 9876543210. Our support team is available 9AM-6PM, Monday to Saturday.",
+        "return": "We accept returns within 7 days of delivery for unopened products. Please contact our support team to initiate a return.",
+        "discount": "We offer seasonal discounts and special offers. Check our website regularly or subscribe to our newsletter for updates.",
+        "account": "You can create an account to track orders, save favorites, and get personalized recommendations. Click on 'Sign Up' in the top menu.",
+        "default": "I'm sorry, I didn't understand your question. You can ask about:\n- Products and fertilizers\n- Checkout process\n- Billing and invoices\n- Delivery and returns\n- Fertilizer usage for specific crops\n- Payment methods\n- Account help"
+      },
+      te: {
+        "products": "మేము సేంద్రీయ, రసాయన మరియు బయో-ఎరువులు వంటి వివిధ రకాల ఎరువులను అందిస్తాము. మీరు పైన మా కేటలాగ్‌ను బ్రౌజ్ చేయవచ్చు.",
+        "checkout": "మీరు 'కార్ట్‌కు వెళ్లండి' బటన్‌పై క్లిక్ చేసి, ఆపై 'చెక్అవుట్‌కు వెళ్లండి' క్లిక్ చేయడం ద్వారా చెక్అవుట్‌కు వెళ్లవచ్చు.",
+        "billing": "బిల్లింగ్ సమస్యల కోసం, దయచేసి మీ ఆర్డర్ వివరాలను చెక్అవుట్ పేజీలో తనిఖీ చేయండి లేదా support@fertilizex.com వద్ద మా మద్దతును సంప్రదించండి.",
+        "invoice": "మీరు మీ ఇన్వాయిస్‌ను ఆర్డర్ నిర్ధారణ పేజీ నుండి లేదా మీ ఖాతా విభాగం నుండి కొనుగోలు తర్వాత డౌన్‌లోడ్ చేసుకోవచ్చు.",
+        "usage": "ప్రతి ఎరువుకు నిర్దిష్ట ఉపయోగ సూచనలు ఉంటాయి. వివరణాత్మక సమాచారం కోసం దయచేసి ప్రతి ఉత్పత్తి కార్డ్‌లోని 'వినియోగ సూచనలు' విభాగాన్ని తనిఖీ చేయండి.",
+        "rice": "వరి పంటల కోసం: యూరియా (100-150కిలోలు/ఎకరం) 3 స్ప్లిట్లలో (బేసల్, టిల్లరింగ్, ప్యానికల్ ఇనిషియేషన్), DAP (50కిలోలు/ఎకరం) నాటే సమయంలో మరియు పొటాష్ (40కిలోలు/ఎకరం) టిల్లరింగ్ సమయంలో వర్తించండి. సరైన నీటి నిర్వహణను నిర్వహించండి.",
+        "cotton": "పత్తి కోసం: 100కిలోల యూరియా, 50కిలోల DAP మరియు 50కిలోల పొటాష్ ను ఎకరానికి పెరుగుదల దశలలో స్ప్లిట్లలో వర్తించండి. మొదటి డోస్ విత్తనం వేసే సమయంలో, రెండవది స్క్వేరింగ్ సమయంలో, మూడవది పుష్పించే సమయంలో.",
+        "tomato": "టమోటాల కోసం: NPK 19:19:19 (75కిలోలు/ఎకరం) పెరుగుదల సమయంలో, కాల్షియం నైట్రేట్ (5కిలోలు/ఎకరం) పండు నాణ్యత కోసం మరియు సూక్ష్మ పోషకాల స్ప్రేలు (Zn, B) ప్రతి 15 రోజులకు ఉపయోగించండి.",
+        "payment": "మేము అన్ని ప్రధాన క్రెడిట్/డెబిట్ కార్డులు, UPI, నెట్ బ్యాంకింగ్ మరియు డెలివరీపై నగదును అంగీకరిస్తాము. మీ పేమెంట్ సమాచారం సురక్షితంగా ప్రాసెస్ చేయబడుతుంది.",
+        "delivery": "స్టాండర్డ్ డెలివరీ 3-5 వ్యాపార రోజులు పడుతుంది. మెట్రో నగరాలకు ఎక్స్ప్రెస్ డెలివరీ అందుబాటులో ఉంది (1-2 రోజులు). ₹2000 కంటే ఎక్కువ ఆర్డర్లకు ఉచిత షిప్పింగ్.",
+        "organic": "మా సేంద్రీయ ఎరువులలో కంపోస్ట్, వెర్మికంపోస్ట్, ఆవు ఎరువు మరియు రైజోబియం వంటి బయో-ఎరువులు ఉన్నాయి. అవి నేల ఆరోగ్యాన్ని మెరుగుపరుస్తాయి మరియు నెమ్మదిగా విడుదలయ్యే పోషకాలను అందిస్తాయి.",
+        "contact": "మీరు మమ్మల్ని support@fertilizex.com వద్ద లేదా +91 9876543210 కి కాల్ చేయవచ్చు. మా సపోర్ట్ టీం ఉదయం 9గంటల నుండి సాయంత్రం 6గంటల వరకు, సోమవారం నుండి శనివారం వరకు అందుబాటులో ఉంటుంది.",
+        "return": "తెరవని ఉత్పత్తుల కోసం డెలివరీ తర్వాత 7 రోజుల్లో మేము రిటర్న్లను అంగీకరిస్తాము. దయచేసి రిటర్న్ ప్రారంభించడానికి మా సపోర్ట్ టీంను సంప్రదించండి.",
+        "discount": "మేము సీజనల్ డిస్కౌంట్లు మరియు ప్రత్యేక ఆఫర్లను అందిస్తాము. నవీకరణల కోసం మా వెబ్‌సైట్‌ను నియమితంగా తనిఖీ చేయండి లేదా మా న్యూస్‌లెటర్‌కు సభ్యత్వాన్ని పొందండి.",
+        "account": "ఆర్డర్లను ట్రాక్ చేయడానికి, ఇష్టమైన వాటిని సేవ్ చేయడానికి మరియు వ్యక్తిగతీకరించిన సిఫార్సులను పొందడానికి మీరు ఖాతాను సృష్టించుకోవచ్చు. టాప్ మెనూ‌లో 'సైన్ అప్'పై క్లిక్ చేయండి.",
+        "default": "నన్ను క్షమించండి, నేను మీ ప్రశ్నను అర్థం చేసుకోలేదు. మీరు ఈ విషయాల గురించి అడగవచ్చు:\n- ఉత్పత్తులు మరియు ఎరువులు\n- చెక్అవుట్ ప్రక్రియ\n- బిల్లింగ్ మరియు ఇన్వాయిస్‌లు\n- డెలివరీ మరియు రిటర్న్‌లు\n- నిర్దిష్ట పంటలకు ఎరువు వినియోగం\n- చెల్లింపు పద్ధతులు\n- ఖాతా సహాయం"
+      }
+    };
+
+    function toggleChatbot() {
+      const chatbot = document.getElementById('chatbotContainer');
+      chatbot.style.display = chatbot.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function sendChatbotMessage() {
+      const input = document.getElementById('chatbotInput');
+      const message = input.value.trim();
+      if (message) {
+        addMessage(message, 'user');
+        input.value = '';
+        
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = 'typingIndicator';
+        typingIndicator.innerHTML = '<span>Pochamma is typing</span><div class="spinner"></div>';
+        typingIndicator.classList.add('message', 'bot-message');
+        document.getElementById('chatbotMessages').appendChild(typingIndicator);
+        document.getElementById('chatbotMessages').scrollTop = document.getElementById('chatbotMessages').scrollHeight;
+        
+        // Simulate typing delay
+        setTimeout(() => {
+          document.getElementById('typingIndicator').remove();
+          const response = getChatbotResponse(message.toLowerCase());
+          addMessage(response, 'bot');
+          
+          // Speak the response if voice is enabled
+          if (window.speechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(response);
+            utterance.lang = currentLanguage === 'en' ? 'en-US' : 'te-IN';
+            
+            // Try to set female voice
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find(voice => 
+              voice.lang.includes(currentLanguage === 'en' ? 'en' : 'te') && 
+              voice.name.toLowerCase().includes('female')
+            );
+            
+            if (femaleVoice) {
+              utterance.voice = femaleVoice;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+          }
+        }, 1500);
+      }
+    }
+
+    function handleChatbotInput(e) {
+      if (e.key === 'Enter') {
+        sendChatbotMessage();
+      }
+    }
+
+    function addMessage(text, sender) {
+      const messagesContainer = document.getElementById('chatbotMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message');
+      messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+      messageDiv.textContent = text;
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function getChatbotResponse(message) {
+      const langResponses = chatbotResponses[currentLanguage];
+      
+      if (message.includes('product') || message.includes('ఉత్పత్తి') || message.includes('fertilizer') || message.includes('ఎరువు')) {
+        return langResponses.products;
+      } else if (message.includes('checkout') || message.includes('చెక్అవుట్') || message.includes('cart') || message.includes('కార్ట్')) {
+        return langResponses.checkout;
+      } else if (message.includes('bill') || message.includes('బిల్లు') || message.includes('payment') || message.includes('చెల్లింపు')) {
+        return langResponses.billing;
+      } else if (message.includes('invoice') || message.includes('ఇన్వాయిస్') || message.includes('receipt') || message.includes('రసీదు')) {
+        return langResponses.invoice;
+      } else if (message.includes('usage') || message.includes('వినియోగం') || message.includes('how to use') || message.includes('ఎలా ఉపయోగించాలి')) {
+        return langResponses.usage;
+      } else if (message.includes('rice') || message.includes('వరి') || message.includes('paddy')) {
+        return langResponses.rice;
+      } else if (message.includes('cotton') || message.includes('పత్తి')) {
+        return langResponses.cotton;
+      } else if (message.includes('tomato') || message.includes('టమాట') || message.includes('టమోటా')) {
+        return langResponses.tomato;
+      } else if (message.includes('delivery') || message.includes('డెలివరీ') || message.includes('shipping') || message.includes('షిప్పింగ్')) {
+        return langResponses.delivery;
+      } else if (message.includes('organic') || message.includes('సేంద్రీయ')) {
+        return langResponses.organic;
+      } else if (message.includes('contact') || message.includes('సంప్రదించండి') || message.includes('support') || message.includes('మద్దతు')) {
+        return langResponses.contact;
+      } else if (message.includes('return') || message.includes('రిటర్న్') || message.includes('refund') || message.includes('వాపసు')) {
+        return langResponses.return;
+      } else if (message.includes('discount') || message.includes('డిస్కౌంట్') || message.includes('offer') || message.includes('ఆఫర్')) {
+        return langResponses.discount;
+      } else if (message.includes('account') || message.includes('ఖాతా') || message.includes('login') || message.includes('లాగిన్')) {
+        return langResponses.account;
+      } else {
+        return langResponses.default;
+      }
+    }
+
+    // Voice recognition
+    function startVoiceRecognition() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = currentLanguage === 'en' ? 'en-US' : 'te-IN';
+      
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('chatbotInput').value = transcript;
+        sendChatbotMessage();
+      };
+      
+      recognition.onerror = function(event) {
+        addMessage(currentLanguage === 'en' ? "Sorry, I couldn't hear you. Please try again." : "క్షమించండి, నేను మిమ్మల్ని వినలేకపోయాను. దయచేసి మళ్లీ ప్రయత్నించండి.", 'bot');
+      };
+      
+      recognition.start();
+      addMessage(currentLanguage === 'en' ? "Listening... Speak now" : "వినడం... ఇప్పుడు మాట్లాడండి", 'bot');
+    }
+
+    // Enhanced products data with more usage details in both languages
+    const products = [
+      { 
+        id:1, 
+        slug:'urea', 
+        name: { en: 'Urea', te: 'యూరియా' }, 
+        type:'chemical', 
+        price:250, 
+        description: { 
+          en: 'High-nitrogen fertilizer for rapid plant growth', 
+          te: 'మొక్కల వేగవంతమైన వృద్ధికి అధిక నత్రజని ఎరువు' 
+        },
+        image:'../images/Urea.jpg',
+        usage: { 
+          en: 'Best for leafy vegetables, cereals. Apply 100-150 kg/acre before sowing and during growth stages. For rice: 3 splits (basal, tillering, panicle initiation). For wheat: 2 splits (basal and crown root initiation). Store in cool, dry place away from moisture.',
+          te: 'ఆకు కూరలు, ధాన్యాలకు ఉత్తమం. విత్తనం వేసే ముందు మరియు పెరుగుదల దశలలో 100-150 కిలోలు/ఎకరం వర్తించండి. వరి కోసం: 3 స్ప్లిట్లు (బేసల్, టిల్లరింగ్, ప్యానికల్ ఇనిషియేషన్). గోధుమ కోసం: 2 స్ప్లిట్లు (బేసల్ మరియు క్రౌన్ రూట్ ఇనిషియేషన్). తేమ నుండి దూరంగా చల్లని, పొడి ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:2, 
+        slug:'dap', 
+        name: { en: 'DAP', te: 'డీఏపీ' }, 
+        type:'chemical', 
+        price:300, 
+        description: { 
+          en: 'Balanced nitrogen & phosphorus fertilizer', 
+          te: 'సమతుల్య నత్రజని మరియు భాస్వరం ఎరువు' 
+        },
+        image:'../images/DAP.jpg',
+        usage: { 
+          en: 'Ideal for flowering plants and root development. Apply 50-100 kg/acre at planting time. For fruit trees: apply in circular trench around drip line. For vegetables: band placement 5cm below seed. Contains 18% N and 46% P2O5. Avoid direct contact with seeds.',
+          te: 'పుష్పించే మొక్కలు మరియు వేరు అభివృద్ధికి అనుకూలం. నాటే సమయంలో 50-100 కిలోలు/ఎకరం వర్తించండి. పండ్ల చెట్లకు: డ్రిప్ లైన్ చుట్టూ వృత్తాకార ట్రెంచ్‌లో వర్తించండి. కూరగాయలకు: విత్తనం క్రింద 5సెం.మీ బ్యాండ్ ప్లేస్‌మెంట్. 18% N మరియు 46% P2O5 ఉంటుంది. విత్తనాలతో నేరుగా సంప్రదించకుండా ఉండండి.' 
+        }
+      },
+      { 
+        id:3, 
+        slug:'potash', 
+        name: { en: 'Potash', te: 'పొటాష్' }, 
+        type:'chemical', 
+        price:220, 
+        description: { 
+          en: 'Potassium-rich fertilizer for fruit quality', 
+          te: 'పండు నాణ్యత కోసం పొటాషియం సమృద్ధిగా ఉండే ఎరువు' 
+        },
+        image:'../images/potash.jpg',
+        usage: { 
+          en: 'Essential for fruit crops like bananas, tomatoes. Apply 40-80 kg/acre during fruiting stage. For grapes: 2 applications (pre-flowering and berry development). Enhances sugar content, color and shelf life. Corrects potassium deficiency shown by yellow leaf margins.',
+          te: 'అరటి, టమోటా వంటి పండ్ల పంటలకు అవసరం. పండ్ల దశలో 40-80 కిలోలు/ఎకరం వర్తించండి. ద్రాక్షకు: 2 అప్లికేషన్లు (పుష్పించే ముందు మరియు బెర్రీ అభివృద్ధి). చక్కెర కంటెంట్, రంగు మరియు షెల్ఫ్ లైఫ్‌ను మెరుగుపరుస్తుంది. పసుపు ఆకు అంచుల ద్వారా చూపబడిన పొటాషియం లోపాన్ని సరిదిద్దుతుంది.' 
+        }
+      },
+      { 
+        id:4, 
+        slug:'compost', 
+        name: { en: 'Compost', te: 'కంపోస్ట్' }, 
+        type:'organic', 
+        price:180, 
+        description: { 
+          en: 'Organic soil amendment improves soil structure', 
+          te: 'సేంద్రీయ నేల సవరణ నేల నిర్మాణాన్ని మెరుగుపరుస్తుంది' 
+        },
+        image:'../images/compost.jpg',
+        usage: { 
+          en: 'Universal for all crops. Apply 2-5 tons/acre before planting to improve soil fertility. Mix thoroughly in top 15cm soil. For container plants: 30% compost with 70% soil. Fully decomposed compost should have earthy smell, dark color and crumbly texture.',
+          te: 'అన్ని పంటలకు సార్వత్రికం. నేల సారాన్ని మెరుగుపరచడానికి నాటే ముందు 2-5 టన్నులు/ఎకరం వర్తించండి. టాప్ 15సెం.మీ నేలలో బాగా కలపండి. కంటైనర్ మొక్కలకు: 30% కంపోస్ట్ మరియు 70% నేల. పూర్తిగా కుళ్ళిన కంపోస్ట్‌కు మట్టి వాసన, ముదురు రంగు మరియు పగుళ్లు కలిగిన ఆకృతి ఉండాలి.' 
+        }
+      },
+      { 
+        id:5, 
+        slug:'npk-20-20-20', 
+        name: { en: 'NPK 20-20-20', te: 'ఎన్‌పీకే 20-20-20' }, 
+        type:'micronutrient', 
+        price:280, 
+        description: { 
+          en: 'Complete NPK formula for balanced nutrition', 
+          te: 'సమతుల్య పోషకాల కోసం పూర్తి ఎన్‌పీకే ఫార్ములా' 
+        },
+        image:'../images/NPK.jpg',
+        usage: { 
+          en: 'General purpose fertilizer. Apply 50-100 kg/acre in 2-3 split doses during crop growth. For foliar spray: dissolve 5g/liter water. Suitable for most field and horticultural crops. Balanced nutrition prevents nutrient lockout. Store away from moisture and direct sunlight.',
+          te: 'సాధారణ ప్రయోజన ఎరువు. పంట పెరుగుదల సమయంలో 2-3 స్ప్లిట్ డోస్‌లలో 50-100 కిలోలు/ఎకరం వర్తించండి. ఆకు పిచికారి కోసం: 5గ్రా/లీటరు నీటిలో కరిగించండి. చాలా క్షేత్ర మరియు తోటపండ్ల పంటలకు అనుకూలం. సమతుల్య పోషకాలు పోషక లాక్‌అవుట్‌ను నిరోధిస్తాయి. తేమ మరియు ప్రత్యక్ష సూర్యకాంతి నుండి దూరంగా నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id: 6,  
+        slug: 'ammonium-sulfate',     
+        name: { en: 'Ammonium Sulfate', te: 'అమ్మోనియం సల్ఫేట్' }, 
+        type: 'chemical',         
+        price: 260, 
+        description: { 
+          en: 'Sulfur-enriched nitrogen fertilizer', 
+          te: 'సల్ఫర్ సమృద్ధిగా ఉండే నత్రజని ఎరువు' 
+        },
+        image: '../images/Ammonium Sulphate.jpg',
+        usage: { 
+          en: 'For sulfur-deficient soils. Apply 100-150 kg/acre for crops like corn, wheat. Contains 21% N and 24% S. Acidifying effect helps in alkaline soils. For tea: 3 applications during growing season. Avoid mixing with alkaline materials like lime. Excellent for onion and garlic crops.',
+          te: 'సల్ఫర్ లోపంతో ఉన్న నేలలకు. మొక్కజొన్న, గోధుమ వంటి పంటలకు 100-150 కిలోలు/ఎకరం వర్తించండి. 21% N మరియు 24% S ఉంటుంది. ఆమ్లీకరణ ప్రభావం క్షార నేలలలో సహాయపడుతుంది. టీ కోసం: పెరుగుతున్న సీజన్‌లో 3 అప్లికేషన్లు. సున్నం వంటి క్షార పదార్థాలతో కలపకండి. ఉల్లిపాయ మరియు వెల్లుల్లి పంటలకు అద్భుతమైనది.' 
+        }
+      },
+      { 
+        id: 7,  
+        slug: 'calcium-nitrate',      
+        name: { en: 'Calcium Nitrate', te: 'కాల్షియం నైట్రేట్' }, 
+        type: 'micronutrient',    
+        price: 310, 
+        description: { 
+          en: 'Fast-acting calcium + nitrogen fertilizer', 
+          te: 'వేగవంతమైన పనిచేసే కాల్షియం + నత్రజని ఎరువు' 
+        },
+        image: '../images/calcium nitrate.jpg',
+        usage: { 
+          en: 'Prevents blossom-end rot in tomatoes. Apply as foliar spray (5g/liter) or soil application (10kg/acre). For apple: 3 sprays at 15-day intervals from fruit set. Corrects calcium deficiency shown by tip burn in lettuce. Highly soluble for fertigation. Contains 15.5% N and 19% Ca.',
+          te: 'టమోటాలలో బ్లాసమ్-ఎండ్ రాట్‌ను నిరోధిస్తుంది. ఆకు పిచికారి (5గ్రా/లీటరు) లేదా నేల అప్లికేషన్ (10కిలోలు/ఎకరం) వర్తించండి. ఆపిల్ కోసం: పండు సెట్ నుండి 15-రోజుల విరామాలతో 3 స్ప్రేలు. లెట్యూస్‌లో టిప్ బర్న్ ద్వారా చూపబడిన కాల్షియం లోపాన్ని సరిదిద్దుతుంది. ఫెర్టిగేషన్ కోసం అత్యంత కరగదగినది. 15.5% N మరియు 19% Ca ఉంటుంది.' 
+        }
+      },
+      { 
+        id: 8,  
+        slug: 'magnesium-sulfate',    
+        name: { en: 'Magnesium Sulfate (Epsom)', te: 'మెగ్నీషియం సల్ఫేట్ (ఎప్సమ్)' }, 
+        type: 'micronutrient', 
+        price: 205, 
+        description: { 
+          en: 'Magnesium sulfate for green leaves', 
+          te: 'ఆకుపచ్చని ఆకుల కోసం మెగ్నీషియం సల్ఫేట్' 
+        },
+        image: '../images/Magnesium Sulfate.jpg',
+        usage: { 
+          en: 'Corrects magnesium deficiency (yellowing between veins). Apply 10-20 kg/acre or as foliar spray (1-2% solution). For citrus: 3 sprays during fruit development. Enhances chlorophyll production. Contains 10% Mg and 13% S. Also benefits roses and peppers.',
+          te: 'మెగ్నీషియం లోపాన్ని సరిదిద్దుతుంది (సిరల మధ్య పసుపు రంగు). 10-20 కిలోలు/ఎకరం లేదా ఆకు పిచికారి (1-2% ద్రావణం) వర్తించండి. సిట్రస్ కోసం: పండు అభివృద్ధి సమయంలో 3 స్ప్రేలు. క్లోరోఫిల్ ఉత్పత్తిని పెంచుతుంది. 10% Mg మరియు 13% S ఉంటుంది. గులాబీలు మరియు బెల్లపువ్వులకు కూడా ప్రయోజనం.' 
+        }
+      },
+      { 
+        id: 9,  
+        slug: 'rock-phosphate',       
+        name: { en: 'Rock Phosphate', te: 'రాక్ ఫాస్ఫేట్' }, 
+        type: 'natural',          
+        price: 195, 
+        description: { 
+          en: 'Slow-release phosphorus source', 
+          te: 'నెమ్మదిగా విడుదలయ్యే భాస్వరం మూలం' 
+        },
+        image: '../images/Rock Phosphate.jpg',
+        usage: { 
+          en: 'For long-term phosphorus supply. Apply 200-400 kg/acre mixed with compost. Best for acidic soils (pH <5.5). For perennial crops: apply in planting pits. Contains 20-30% P2O5. Finely ground powder for better availability. Combine with organic matter for better results.',
+          te: 'దీర్ఘకాలిక భాస్వరం సరఫరా కోసం. కంపోస్ట్‌తో కలిపి 200-400 కిలోలు/ఎకరం వర్తించండి. ఆమ్ల నేలలకు ఉత్తమం (pH <5.5). బహుళవార్షిక పంటలకు: నాటే గుంటలలో వర్తించండి. 20-30% P2O5 ఉంటుంది. మెరుగైన లభ్యత కోసం సూక్ష్మంగా నూరిన పొడి. మంచి ఫలితాల కోసం సేంద్రీయ పదార్థంతో కలపండి.' 
+        }
+      },
+      { 
+        id:10,  
+        slug: 'gypsum',               
+        name: { en: 'Gypsum', te: 'జిప్సం' }, 
+        type: 'soil-conditioner',  
+        price: 175, 
+        description: { 
+          en: 'Improves soil structure and calcium supply', 
+          te: 'నేల నిర్మాణం మరియు కాల్షియం సరఫరాను మెరుగుపరుస్తుంది' 
+        },
+        image: '../images/Gypsum.jpg',
+        usage: { 
+          en: 'For sodic soil reclamation. Apply 1-2 tons/acre and mix thoroughly in topsoil. Also benefits peanut crops (for pod development). Does not change soil pH. Improves water infiltration in clay soils. Contains 23% Ca and 18% S. Apply before irrigation for best results.',
+          te: 'సోడిక్ నేల పునరుద్ధరణ కోసం. 1-2 టన్నులు/ఎకరం వర్తించండి మరియు టాప్‌సాయిల్‌లో బాగా కలపండి. వేరుశనగ పంటలకు కూడా ప్రయోజనం (పాడ్ అభివృద్ధి కోసం). నేల pHని మార్చదు. క్లే నేలలలో నీటి చొరబాటును మెరుగుపరుస్తుంది. 23% Ca మరియు 18% S ఉంటుంది. ఉత్తమ ఫలితాల కోసం నీటిపారుదలకు ముందు వర్తించండి.' 
+        }
+      },
+      { 
+        id:11,  
+        slug: 'humic-acid',           
+        name: { en: 'Humic Acid', te: 'హ్యూమిక్ యాసిడ్' }, 
+        type: 'organic',          
+        price: 230, 
+        description: { 
+          en: 'Soil fertility enhancer and growth stimulant', 
+          te: 'నేల సారవంతం మరియు వృద్ధి ప్రేరకం' 
+        },
+        image: '../images/Humic acid.jpg',
+        usage: { 
+          en: 'Mix with irrigation water (5-10 kg/acre) or apply as foliar spray (0.1-0.2%). Enhances nutrient uptake and root development. Improves soil microbial activity. Apply at sowing/transplanting and during critical growth stages. Compatible with most fertilizers. Store in cool place away from sunlight.',
+          te: 'నీటిపారుదల నీటితో కలపండి (5-10 కిలోలు/ఎకరం) లేదా ఆకు పిచికారిగా వర్తించండి (0.1-0.2%). పోషకాల గ్రహణ మరియు వేరు అభివృద్ధిని మెరుగుపరుస్తుంది. నేల సూక్ష్మజీవుల కార్యకలాపాలను మెరుగుపరుస్తుంది. విత్తనం/మారుపుని మరియు క్లిష్టమైన పెరుగుదల దశలలో వర్తించండి. చాలా ఎరువులతో అనుకూలంగా ఉంటుంది. సూర్యకాంతి నుండి దూరంగా చల్లని ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:12,  
+        slug: 'kelp-extract',         
+        name: { en: 'Kelp Extract', te: 'కెల్ప్ ఎక్స్‌ట్రాక్ట్' }, 
+        type: 'bio',              
+        price: 320, 
+        description: { 
+          en: 'Seaweed-based growth stimulator', 
+          te: 'సీవీడ్-ఆధారిత వృద్ధి ప్రేరకం' 
+        },
+        image: '../images/Kelp Extract.jpg',
+        usage: { 
+          en: 'Growth promoter for all crops. Apply as foliar spray (2-3 ml/liter) every 15 days. Contains natural cytokinins and auxins. Enhances stress tolerance (drought, heat). Improves flowering and fruit set. Can be mixed with most pesticides. Best results when applied in early morning or late evening.',
+          te: 'అన్ని పంటలకు వృద్ధి ప్రోత్సాహకం. ప్రతి 15 రోజులకు ఆకు పిచికారిగా వర్తించండి (2-3 మి.లీ/లీటరు). సహజ సైటోకినిన్స్ మరియు ఆక్సిన్లను కలిగి ఉంటుంది. ఒత్తిడి సహనాన్ని మెరుగుపరుస్తుంది (ఎండ, వేడి). పుష్పించడం మరియు పండు సెట్‌ను మెరుగుపరుస్తుంది. చాలా పురుగుమందులతో కలపవచ్చు. ఉదయం తొలివేళలో లేదా సాయంత్రం వేళలో వర్తించినప్పుడు ఉత్తమ ఫలితాలు.' 
+        }
+      },
+      { 
+        id:13,  
+        slug: 'azospirillum',         
+        name: { en: 'Azospirillum', te: 'అజోస్పిరిల్లమ్' }, 
+        type: 'bio',              
+        price: 290, 
+        description: { 
+          en: 'Nitrogen-fixing biofertilizer', 
+          te: 'నత్రజని స్థిరీకరణ బయోఫెర్టిలైజర్' 
+        },
+        image: '../images/Azospirillum.jpg',
+        usage: { 
+          en: 'For cereals and grasses. Apply 2 kg/acre as seed treatment or soil application. Fixes 20-40 kg N/acre. Compatible with Rhizobium. Store in cool place (4-10°C). Do not mix with chemical fertilizers. Best applied at sowing time. Enhances root growth and water uptake.',
+          te: 'ధాన్యాలు మరియు గడ్డి పంటలకు. విత్తనం చికిత్స లేదా నేల అప్లికేషన్‌గా 2 కిలోలు/ఎకరం వర్తించండి. 20-40 కిలోలు N/ఎకరం స్థిరీకరిస్తుంది. రైజోబియంతో అనుకూలంగా ఉంటుంది. చల్లని ప్రదేశంలో నిల్వ చేయండి (4-10°C). రసాయన ఎరువులతో కలపకండి. విత్తనం వేసే సమయంలో ఉత్తమంగా వర్తించండి. వేరు వృద్ధి మరియు నీటి గ్రహణను మెరుగుపరుస్తుంది.' 
+        }
+      },
+      { 
+        id:14,  
+        slug: 'rhizobium',            
+        name: { en: 'Rhizobium', te: 'రైజోబియం' }, 
+        type: 'bio',              
+        price: 300, 
+        description: { 
+          en: 'Legume symbiotic bacteria', 
+          te: 'పప్పుధాన్య సహజీవన బాక్టీరియా' 
+        },
+        image: '../images/Rhizobium.jpg',
+        usage: { 
+          en: 'For pulses and legumes. Apply 2 kg/acre as seed treatment before sowing. Fixes 50-100 kg N/acre. Use specific strain for each crop (e.g., different for chickpea and soybean). Do not expose to direct sunlight. Mix with jaggery solution for better adhesion. Store in cool place.',
+          te: 'పప్పుధాన్యాలు మరియు కాయధాన్యాలకు. విత్తనం వేసే ముందు విత్తనం చికిత్సగా 2 కిలోలు/ఎకరం వర్తించండి. 50-100 కిలోలు N/ఎకరం స్థిరీకరిస్తుంది. ప్రతి పంటకు నిర్దిష్ట స్ట్రెయిన్‌ను ఉపయోగించండి (ఉదా., సెనగ మరియు సోయాబీన్‌కు భిన్నమైనది). ప్రత్యక్ష సూర్యకాంతికి గురిచేయకండి. మంచి అంటుకోవడం కోసం బెల్లం ద్రావణంతో కలపండి. చల్లని ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:15,  
+        slug: 'bacillus-thuringiensis', 
+        name: { en: 'Bacillus Thuringiensis', te: 'బాసిల్లస్ థురింజియెన్సిస్' }, 
+        type: 'bio', 
+        price: 330, 
+        description: { 
+          en: 'Pest control biofertilizer', 
+          te: 'కీటక నియంత్రణ బయోఫెర్టిలైజర్' 
+        },
+        image: '../images/bacillus thuringiensis.jpg',
+        usage: { 
+          en: 'For caterpillar control. Apply as foliar spray (5-10 g/liter) when pests appear. Effective against lepidopteran larvae. Works best when applied in evening. Repeat every 7-10 days if needed. Can be mixed with neem oil for better results. Safe for beneficial insects. Store in cool dark place.',
+          te: 'గొంగళి పురుగుల నియంత్రణ కోసం. కీటకాలు కనిపించినప్పుడు ఆకు పిచికారిగా వర్తించండి (5-10 గ్రా/లీటరు). లెపిడాప్టెరన్ లార్వాకు వ్యతిరేకంగా ప్రభావవంతంగా ఉంటుంది. సాయంత్రం వేళలో వర్తించినప్పుడు ఉత్తమంగా పనిచేస్తుంది. అవసరమైతే ప్రతి 7-10 రోజులకు పునరావృతం చేయండి. మంచి ఫలితాల కోసం వేప నూనెతో కలపవచ్చు. ప్రయోజనకరమైన కీటకాలకు సురక్షితం. చల్లని చీకటి ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:16,  
+        slug: 'liquid-urea',          
+        name: { en: 'Liquid Urea', te: 'లిక్విడ్ యూరియా' }, 
+        type: 'liquid',          
+        price: 270, 
+        description: { 
+          en: 'Quick nitrogen boost in liquid form', 
+          te: 'ద్రవ రూపంలో వేగవంతమైన నత్రజని బూస్ట్' 
+        },
+        image: '../images/Liquid Urea.jpg',
+        usage: { 
+          en: 'For fast nitrogen uptake. Apply 10-20 liters/acre through fertigation or foliar spray. Contains 20% N. Can be mixed with most pesticides. For foliar spray: dilute 1:50 with water. Apply during cooler parts of day. Suitable for all crops needing quick N. Store in shaded area below 30°C.',
+          te: 'వేగవంతమైన నత్రజని గ్రహణ కోసం. ఫెర్టిగేషన్ లేదా ఆకు పిచికారి ద్వారా 10-20 లీటర్లు/ఎకరం వర్తించండి. 20% N ఉంటుంది. చాలా పురుగుమందులతో కలపవచ్చు. ఆకు పిచికారి కోసం: నీటితో 1:50 నిష్పత్తిలో కరిగించండి. రోజు యొక్క చల్లని భాగాలలో వర్తించండి. వేగంగా N అవసరమయ్యే అన్ని పంటలకు అనుకూలం. 30°C కంటే తక్కువ నీడ ప్రాంతంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:17,  
+        slug: 'liquid-npk',           
+        name: { en: 'Liquid NPK 20-10-10', te: 'లిక్విడ్ ఎన్‌పీకే 20-10-10' }, 
+        type: 'liquid',          
+        price: 290, 
+        description: { 
+          en: 'Balanced liquid fertilizer', 
+          te: 'సమతుల్య ద్రవ ఎరువు' 
+        },
+        image: '../images/Liquid Npk-20-10-10.jpg',
+        usage: { 
+          en: 'For fertigation systems. Apply 5-10 liters/acre in irrigation water every 2 weeks. Promotes vegetative growth. Can be used as foliar spray (3-5 ml/liter). Compatible with most micronutrients. Shake well before use. Avoid mixing with alkaline products. Store in original container away from heat.',
+          te: 'ఫెర్టిగేషన్ సిస్టమ్‌ల కోసం. ప్రతి 2 వారాలకు నీటిపారుదల నీటిలో 5-10 లీటర్లు/ఎకరం వర్తించండి. సాధారణ వృద్ధిని ప్రోత్సహిస్తుంది. ఆకు పిచికారిగా ఉపయోగించవచ్చు (3-5 మి.లీ/లీటరు). చాలా సూక్ష్మ పోషకాలతో అనుకూలంగా ఉంటుంది. ఉపయోగించే ముందు బాగా కలపండి. క్షార ఉత్పత్తులతో కలపకండి. వేడి నుండి దూరంగా అసలు కంటైనర్‌లో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:18,  
+        slug: 'seaweed-liquid',       
+        name: { en: 'Seaweed Liquid', te: 'సీవీడ్ లిక్విడ్' }, 
+        type: 'liquid',          
+        price: 315, 
+        description: { 
+          en: 'Organic liquid growth elixir', 
+          te: 'సేంద్రీయ ద్రవ వృద్ధి ఎలిక్సిర్' 
+        },
+        image: '../images/Seaweed Liquid.jpg',
+        usage: { 
+          en: 'Plant growth regulator. Apply 2-3 ml/liter as foliar spray every 15 days. Contains natural hormones (cytokinins, auxins). Enhances stress tolerance and yield. Can be mixed with most fertilizers. Best applied in early growth stages. Shake well before use. Store below 30°C in shaded area.',
+          te: 'మొక్కల వృద్ధి నియంత్రకం. ప్రతి 15 రోజులకు ఆకు పిచికారిగా 2-3 మి.లీ/లీటరు వర్తించండి. సహజ హార్మోన్లను కలిగి ఉంటుంది (సైటోకినిన్స్, ఆక్సిన్స్). ఒత్తిడి సహనం మరియు దిగుబడిని మెరుగుపరుస్తుంది. చాలా ఎరువులతో కలపవచ్చు. ప్రారంభ వృద్ధి దశలలో ఉత్తమంగా వర్తించబడుతుంది. ఉపయోగించే ముందు బాగా కలపండి. నీడ ప్రాంతంలో 30°C కంటే తక్కువ నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:19,  
+        slug: 'borax',                
+        name: { en: 'Borax', te: 'బోరాక్స్' }, 
+        type: 'micronutrient',    
+        price: 225, 
+        description: { 
+          en: 'Boron nutrient for flowering and fruiting', 
+          te: 'పుష్పించడం మరియు పండించడం కోసం బోరాన్ పోషకం' 
+        },
+        image: '../images/Borax.jpg',
+        usage: { 
+          en: 'For boron-deficient soils. Apply 5-10 kg/acre or as foliar spray (0.2% solution). Essential for pollen viability and fruit set. Apply to crops like cotton, sunflower, fruits. Deficiency causes hollow stems in cauliflower. Do not overapply as boron toxicity can occur. Store in dry place.',
+          te: 'బోరాన్ లోపంతో ఉన్న నేలలకు. 5-10 కిలోలు/ఎకరం లేదా ఆకు పిచికారిగా వర్తించండి (0.2% ద్రావణం). పుప్పొడి వయాబిలిటీ మరియు పండు సెట్ కోసం అవసరం. పత్తి, సూర్యకాంతి, పండ్ల వంటి పంటలకు వర్తించండి. లోపం కాలీఫ్లవర్‌లో హోలో కాండాలకు కారణమవుతుంది. బోరాన్ విషం సంభవించవచ్చు కాబట్టి ఎక్కువగా వర్తించవద్దు. పొడి ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:20,  
+        slug: 'zinc-sulfate',         
+        name: { en: 'Zinc Sulfate', te: 'జింక్ సల్ఫేట్' }, 
+        type: 'micronutrient',    
+        price: 240, 
+        description: { 
+          en: 'Zinc for enzyme function and growth', 
+          te: 'ఎంజైమ్ ఫంక్షన్ మరియు వృద్ధి కోసం జింక్' 
+        },
+        image: '../images/Zinc Sulfate.jpg',
+        usage: { 
+  en: 'Corrects zinc deficiency. Apply 10-25 kg/acre or as foliar spray (0.5% solution). For rice: apply at tillering stage. Deficiency causes "khaira" disease in rice. Can be mixed with urea. Do not mix with phosphate fertilizers. Store in dry place away from moisture.',
+  te: 'జింక్ లోపాన్ని సరిదిద్దుతుంది. 10-25 కిలోలు/ఎకరం లేదా ఆకు పిచికారిగా వర్తించండి (0.5% ద్రావణం). వరి కోసం: టిల్లరింగ్ దశలో వర్తించండి. లోపం వరిలో "ఖైరా" వ్యాధికి కారణమవుతుంది. యూరియాతో కలపవచ్చు. ఫాస్ఫేట్ ఎరువులతో కలపకండి. తేమ నుండి దూరంగా పొడి ప్రదేశంలో నిల్వ చేయండి.'
+}
+      },
+      { 
+        id:21,  
+        slug: 'chelated-iron',        
+        name: { en: 'Chelated Iron', te: 'చెలేటెడ్ ఇనుము' }, 
+        type: 'micronutrient',    
+        price: 260, 
+        description: { 
+          en: 'Prevents yellowing leaves (chlorosis)', 
+          te: 'పసుపు ఆకులను నిరోధిస్తుంది (క్లోరోసిస్)' 
+        },
+        image: '../images/Chelated Iron.jpg',
+        usage: { 
+          en: 'For iron-deficient plants. Apply as foliar spray (0.5-1%) when deficiency appears. Works in high pH soils where normal iron is unavailable. Apply to crops like citrus, grapes, ornamentals. Can be mixed with most pesticides. Repeat every 15 days if needed. Store in cool place.',
+          te: 'ఇనుము లోపంతో ఉన్న మొక్కలకు. లోపం కనిపించినప్పుడు ఆకు పిచికారిగా వర్తించండి (0.5-1%). సాధారణ ఇనుము అందుబాటులో లేని అధిక pH నేలలలో పనిచేస్తుంది. సిట్రస్, ద్రాక్ష, అలంకార మొక్కలకు వర్తించండి. చాలా పురుగుమందులతో కలపవచ్చు. అవసరమైతే ప్రతి 15 రోజులకు పునరావృతం చేయండి. చల్లని ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:22,  
+        slug: 'cow-manure',           
+        name: { en: 'Cow Manure', te: 'ఆవు ఎరువు' }, 
+        type: 'organic',          
+        price: 190, 
+        description: { 
+          en: 'Rich organic manure for soil health', 
+          te: 'నేల ఆరోగ్యం కోసం సమృద్ధిగా ఉండే సేంద్రీయ ఎరువు' 
+        },
+        image: '../images/Cow Manure.jpg',
+        usage: { 
+          en: 'General soil amendment. Apply 5-10 tons/acre before planting to improve fertility. Should be well-decomposed (3-6 months). Mix thoroughly in topsoil. Excellent for vegetable gardens. Can be composted with crop residues. Low risk of burning plants. Store in shaded area to preserve nutrients.',
+          te: 'సాధారణ నేల సవరణ. సారవంతం మెరుగుపరచడానికి నాటే ముందు 5-10 టన్నులు/ఎకరం వర్తించండి. బాగా కుళ్ళిపోయినదిగా ఉండాలి (3-6 నెలలు). టాప్‌సాయిల్‌లో బాగా కలపండి. కూరగాయల తోటలకు అద్భుతమైనది. పంట అవశేషాలతో కంపోస్ట్ చేయవచ్చు. మొక్కలను కాల్చే ప్రమాదం తక్కువ. పోషకాలను సంరక్షించడానికి నీడ ప్రాంతంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:23,  
+        slug: 'poultry-manure',       
+        name: { en: 'Poultry Manure', te: 'పౌల్ట్రీ ఎరువు' }, 
+        type: 'organic',          
+        price: 200, 
+        description: { 
+          en: 'High-nitrogen organic soil boost', 
+          te: 'అధిక నత్రజని సేంద్రీయ నేల బూస్ట్' 
+        },
+        image: '../images/Poultry Manure.jpg',
+        usage: { 
+          en: 'For nitrogen-demanding crops. Apply 2-5 tons/acre after proper composting. Hot manure - compost for 2-3 months before use. Mix with carbon-rich materials to balance C:N ratio. Excellent for leafy vegetables. Avoid direct application to plant roots. Store in covered pit to prevent nutrient loss.',
+          te: 'నత్రజని-అవసరమయ్యే పంటలకు. సరైన కంపోస్టింగ్ తర్వాత 2-5 టన్నులు/ఎకరం వర్తించండి. హాట్ ఎరువు - ఉపయోగించే ముందు 2-3 నెలల పాటు కంపోస్ట్ చేయండి. C:N నిష్పత్తిని సమతుల్యం చేయడానికి కార్బన్-సమృద్ధిగా ఉండే పదార్థాలతో కలపండి. ఆకు కూరలకు అద్భుతమైనది. మొక్కల వేర్లకు నేరుగా వర్తించకండి. పోషకాల నష్టాన్ని నివారించడానికి కప్పబడిన గుంటలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:24,  
+        slug: 'vermicompost',         
+        name: { en: 'Vermicompost', te: 'వెర్మికంపోస్ట్' }, 
+        type: 'organic',          
+        price: 250, 
+        description: { 
+          en: 'Earthworm compost rich in nutrients', 
+          te: 'పోషకాలతో సమృద్ధిగా ఉండే వానపాము కంపోస్ట్' 
+        },
+        image: '../images/vermicompost.jpg',
+        usage: { 
+          en: 'Premium organic fertilizer. Apply 2-3 tons/acre at planting time. Contains beneficial microbes. Improves soil structure and water retention. Safe for seedlings. Can be used as potting mix (30% vermicompost + 70% soil). Apply every season for best results. Store in shaded area to maintain microbial activity.',
+          te: 'ప్రీమియం సేంద్రీయ ఎరువు. నాటే సమయంలో 2-3 టన్నులు/ఎకరం వర్తించండి. ప్రయోజనకరమైన సూక్ష్మజీవులను కలిగి ఉంటుంది. నేల నిర్మాణం మరియు నీటి నిలుపుదలను మెరుగుపరుస్తుంది. మొలకలకు సురక్షితం. పాటింగ్ మిక్స్‌గా ఉపయోగించవచ్చు (30% వెర్మికంపోస్ట్ + 70% నేల). ఉత్తమ ఫలితాల కోసం ప్రతి సీజన్‌లో వర్తించండి. సూక్ష్మజీవుల కార్యకలాపాలను నిర్వహించడానికి నీడ ప్రాంతంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:25,  
+        slug: 'biochar',              
+        name: { en: 'Biochar', te: 'బయోచార్' }, 
+        type: 'organic',          
+        price: 220, 
+        description: { 
+          en: 'Soil carbon retention enhancer', 
+          te: 'నేల కార్బన్ నిలుపుదల పెంపుదల' 
+        },
+        image: '../images/Bio Char.jpg',
+        usage: { 
+          en: 'Soil amendment. Mix 1-2 tons/acre with compost for long-term soil improvement. Increases water retention in sandy soils. Reduces nutrient leaching. Apply once every 2-3 years. Best when charged with nutrients (soak in compost tea before use). Can be used as potting mix component. Store in dry place.',
+          te: 'నేల సవరణ. దీర్ఘకాలిక నేల మెరుగుదల కోసం కంపోస్ట్‌తో 1-2 టన్నులు/ఎకరం కలపండి. ఇసుక నేలలలో నీటి నిలుపుదలను పెంచుతుంది. పోషకాల లీచింగ్‌ను తగ్గిస్తుంది. ప్రతి 2-3 సంవత్సరాలకు ఒకసారి వర్తించండి. పోషకాలతో ఛార్జ్ చేసినప్పుడు ఉత్తమం (ఉపయోగించే ముందు కంపోస్ట్ టీలో నానబెట్టండి). పాటింగ్ మిక్స్ భాగంగా ఉపయోగించవచ్చు. పొడి ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      },
+      { 
+        id:26,  
+        slug: 'superphosphate',       
+        name: { en: 'Superphosphate', te: 'సూపర్ ఫాస్ఫేట్' }, 
+        type: 'chemical',         
+        price: 210, 
+        description: { 
+          en: 'Phosphorus booster for root development', 
+          te: 'వేరు అభివృద్ధి కోసం భాస్వరం బూస్టర్' 
+        },
+        image: '../images/Super Phosphate.jpg',
+        usage: { 
+          en: 'For phosphorus-deficient soils. Apply 50-100 kg/acre at planting time. Contains 16% P2O5. Band placement near roots is most effective. Can be mixed with organic manures. Avoid contact with seeds. Store in dry place. Reapply every season as phosphorus is immobile in soil.',
+          te: 'భాస్వరం లోపంతో ఉన్న నేలలకు. నాటే సమయంలో 50-100 కిలోలు/ఎకరం వర్తించండి. 16% P2O5 ఉంటుంది. వేర్ల దగ్గర బ్యాండ్ ప్లేస్‌మెంట్ చాలా ప్రభావవంతంగా ఉంటుంది. సేంద్రీయ ఎరువులతో కలపవచ్చు. విత్తనాలతో సంప్రదించకండి. పొడి ప్రదేశంలో నిల్వ చేయండి. భాస్వరం నేలలో కదలకుండా ఉండడం వల్ల ప్రతి సీజన్‌లో తిరిగి వర్తించండి.' 
+        }
+      },
+      { 
+        id:27,  
+        slug: 'urea-formaldehyde',    
+        name: { en: 'Urea‑Formaldehyde', te: 'యూరియా-ఫార్మాల్డిహైడ్' }, 
+        type: 'chemical',         
+        price: 310, 
+        description: { 
+          en: 'Slow-release nitrogen fertilizer', 
+          te: 'నెమ్మదిగా విడుదలయ్యే నత్రజని ఎరువు' 
+        },
+        image: '../images/Urea Formaldehyde.jpg',
+        usage: { 
+          en: 'For sustained nitrogen supply. Apply 50-100 kg/acre at planting for long-duration crops. Releases N over 6-8 weeks. Reduces leaching losses. Ideal for sandy soils. Can be top-dressed for perennial crops. Contains 38% N. Store in cool dry place. Not suitable for short-duration crops.',
+          te: 'స్థిరమైన నత్రజని సరఫరా కోసం. దీర్ఘకాలిక పంటలకు నాటే సమయంలో 50-100 కిలోలు/ఎకరం వర్తించండి. 6-8 వారాలలో Nని విడుదల చేస్తుంది. లీచింగ్ నష్టాలను తగ్గిస్తుంది. ఇసుక నేలలకు అనుకూలం. బహుళవార్షిక పంటలకు టాప్-డ్రెస్ చేయవచ్చు. 38% N ఉంటుంది. చల్లని పొడి ప్రదేశంలో నిల్వ చేయండి. స్వల్పకాలిక పంటలకు అనుకూలం కాదు.' 
+        }
+      },
+      { 
+        id:28,  
+        slug: 'muriate-of-potash',    
+        name: { en: 'Muriate of Potash', te: 'మ్యూరియేట్ ఆఫ్ పొటాష్' }, 
+        type: 'chemical',         
+        price: 230, 
+        description: { 
+          en: 'MOP potassium source for plants', 
+          te: 'మొక్కల కోసం MOP పొటాషియం మూలం' 
+        },
+        image: '../images/Muriate of Potash.jpg',
+        usage: { 
+          en: 'For potassium nutrition. Apply 40-80 kg/acre during active growth stages. Contains 60% K2O. Avoid for chloride-sensitive crops (tobacco, potatoes). Best for cereals and oilseeds. Can be mixed with most fertilizers except calcium salts. Store in dry place. Reapply every season as K is mobile in soil.',
+          te: 'పొటాషియం పోషకాల కోసం. సక్రియ పెరుగుదల దశలలో 40-80 కిలోలు/ఎకరం వర్తించండి. 60% K2O ఉంటుంది. క్లోరైడ్-సున్నితమైన పంటలకు (తమాకు, బంగాళదుంపలు) తప్పించుకోండి. ధాన్యాలు మరియు నూనెగింజలకు ఉత్తమం. కాల్షియం లవణాలు తప్ప చాలా ఎరువులతో కలపవచ్చు. పొడి ప్రదేశంలో నిల్వ చేయండి. K నేలలో మొబైల్‌గా ఉండడం వల్ల ప్రతి సీజన్‌లో తిరిగి వర్తించండి.' 
+        }
+      },
+      { 
+        id:29,  
+        slug: 'sulphate-of-potash',   
+        name: { en: 'Sulphate of Potash', te: 'సల్ఫేట్ ఆఫ్ పొటాష్' }, 
+        type: 'chemical',         
+        price: 245, 
+        description: { 
+          en: 'SOP potassium sulfate fertilizer', 
+          te: 'SOP పొటాషియం సల్ఫేట్ ఎరువు' 
+        },
+        image: '../images/Sulphate of Potash.jpg',
+        usage: { 
+          en: 'For chloride-sensitive crops. Apply 40-80 kg/acre during fruiting/flowering. Contains 50% K2O and 18% S. Premium quality for fruits, vegetables, tobacco. More expensive than MOP. Can be foliar applied (1% solution). Store in dry place. Ideal for fertigation systems.',
+          te: 'క్లోరైడ్-సున్నితమైన పంటలకు. పండించడం/పుష్పించే సమయంలో 40-80 కిలోలు/ఎకరం వర్తించండి. 50% K2O మరియు 18% S ఉంటుంది. పండ్లు, కూరగాయలు, తమాకు కోసం ప్రీమియం నాణ్యత. MOP కంటే ఖరీదైనది. ఆకు పిచికారిగా వర్తించవచ్చు (1% ద్రావణం). పొడి ప్రదేశంలో నిల్వ చేయండి. ఫెర్టిగేషన్ సిస్టమ్‌లకు అనుకూలం.' 
+        }
+      },
+      { 
+        id:30,  
+        slug: 'dolomite-lime',        
+        name: { en: 'Dolomite Lime', te: 'డోలోమైట్ లైమ్' }, 
+        type: 'soil-conditioner', 
+        price: 185, 
+        description: { 
+          en: 'Calcium + magnesium lime for acidic soils', 
+          te: 'ఆమ్ల నేలలకు కాల్షియం + మెగ్నీషియం సున్నం' 
+        },
+        image: '../images/Dolomite Lime.jpg',
+        usage: { 
+          en: 'For soil pH correction. Apply 1-2 tons/acre and mix well before planting. Raises pH by 0.5-1 unit. Contains 20% Ca and 10% Mg. Best for magnesium-deficient acidic soils. Apply 2-3 months before planting for full effect. Not for alkaline soils. Store in dry place.',
+          te: 'నేల pH సరిదిద్దడానికి. నాటే ముందు 1-2 టన్నులు/ఎకరం వర్తించండి మరియు బాగా కలపండి. pHని 0.5-1 యూనిట్ పెంచుతుంది. 20% Ca మరియు 10% Mg ఉంటుంది. మెగ్నీషియం లోపంతో ఉన్న ఆమ్ల నేలలకు ఉత్తమం. పూర్తి ప్రభావం కోసం నాటే ముందు 2-3 నెలల ముందు వర్తించండి. క్షార నేలలకు కాదు. పొడి ప్రదేశంలో నిల్వ చేయండి.' 
+        }
+      }
+    ];
+
+    let currentPage = 1;
+    const perPage = 6;
+
+    function applyFilters() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      const category = document.getElementById("categoryFilter").value;
+
+      let filtered = products.filter(product => 
+        product.name.en.toLowerCase().includes(query) || 
+        product.name.te.toLowerCase().includes(query)
+      );
+
+      if (category !== "all") {
+        filtered = filtered.filter(product => product.type === category);
+      }
+
+      renderPaginatedProducts(filtered);
+    }
+
+    function renderPaginatedProducts(filtered) {
+      const container = document.getElementById("productList");
+      const pagination = document.getElementById("pagination");
+      const totalPages = Math.ceil(filtered.length / perPage);
+      const start = (currentPage - 1) * perPage;
+      const end = start + perPage;
+      const pageItems = filtered.slice(start, end);
+
+      container.innerHTML = "";
+      pageItems.forEach(product => {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartItem = cart.find(item => item.id === product.id);
+        const quantity = cartItem ? cartItem.quantity : 0;
+        
+        const card = `
+          <div class="bg-white text-black rounded-lg shadow-lg overflow-hidden fade-in hover:shadow-xl transition flex flex-col h-full">
+            <div class="h-64 overflow-hidden">
+              <img src="${product.image}" alt="${product.name.en}" class="w-full h-full object-contain">
+            </div>
+            <div class="p-4 flex-grow">
+              <h3 class="text-xl font-semibold">${product.name[currentLanguage]}</h3>
+              <p class="text-sm text-gray-600 mt-2">${product.description[currentLanguage]}</p>
+              <div class="mt-3 bg-gray-100 p-3 rounded">
+                <p class="text-xs font-medium text-gray-800">${translations[currentLanguage].usageTitle}</p>
+                <p class="text-xs text-gray-600 mt-1">${product.usage[currentLanguage]}</p>
+              </div>
+            </div>
+            <div class="px-4 pb-4 flex items-center justify-between">
+              <span class="text-green-600 font-bold text-lg">${translations[currentLanguage].priceSymbol}${product.price}</span>
+              <div class="flex items-center gap-2">
+                <button onclick="updateCart(${product.id}, -1)" class="decrease-btn px-2 py-1 rounded ${quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${quantity === 0 ? 'disabled' : ''}>
+                  -
+                </button>
+                <span class="px-2">${quantity}</span>
+                <button onclick="updateCart(${product.id}, 1)" class="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700">
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += card;
+      });
+
+      // Pagination Buttons
+      pagination.innerHTML = "";
+      if (totalPages > 1) {
+        for (let i = 1; i <= totalPages; i++) {
+          pagination.innerHTML += `<button onclick="goToPage(${i})" class="px-3 py-1 rounded ${i === currentPage ? 'bg-green-600' : 'bg-gray-700 hover:bg-gray-600'}">${i}</button>`;
+        }
+      }
+      
+      updateCartCount();
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      applyFilters();
+    }
+
+    function updateCart(productId, change) {
+      const selectedProduct = products.find(p => p.id === productId);
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existingIndex = cart.findIndex(item => item.id === productId);
+      
+      if (existingIndex >= 0) {
+        cart[existingIndex].quantity += change;
+        
+        if (cart[existingIndex].quantity <= 0) {
+          cart.splice(existingIndex, 1);
+          showNotification(
+            translations[currentLanguage].notificationRemove.replace('{product}', selectedProduct.name[currentLanguage]), 
+            'warning'
+          );
+        } else {
+          showNotification(
+            translations[currentLanguage].notificationUpdate
+              .replace('{product}', selectedProduct.name[currentLanguage])
+              .replace('{quantity}', cart[existingIndex].quantity), 
+            'success'
+          );
+        }
+      } else if (change > 0) {
+        cart.push({ ...selectedProduct, quantity: 1 });
+        showNotification(
+          translations[currentLanguage].notificationAdd.replace('{product}', selectedProduct.name[currentLanguage]), 
+          'success'
+        );
+      }
+      
+      localStorage.setItem("cart", JSON.stringify(cart));
+      applyFilters();
+    }
+
+    function showNotification(message, type) {
+      const notification = document.getElementById("notification");
+      const notificationMessage = document.getElementById("notification-message");
+      
+      notificationMessage.textContent = message;
+      notification.className = `notification ${type} show`;
+      
+      setTimeout(() => {
+        notification.classList.remove("show");
+      }, 3000);
+    }
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById("cart-count").textContent = totalItems;
+    }
+
+    function toggleTheme() {
+      const body = document.getElementById("pageBody");
+      const themeToggle = document.getElementById("themeToggle");
+      
+      if (body.classList.contains("bg-black/70")) {
+        // Switch to light theme (black-blue gradient)
+        body.classList.remove("bg-black/70", "text-white");
+        body.classList.add("light-theme");
+        themeToggle.classList.remove("dark");
+        themeToggle.classList.add("light");
+        themeToggle.querySelector(".theme-toggle-inner").textContent = "☀️";
+        localStorage.setItem("theme", "light");
+      } else {
+        // Switch to dark theme
+        body.classList.remove("light-theme");
+        body.classList.add("bg-black/70", "text-white");
+        themeToggle.classList.remove("light");
+        themeToggle.classList.add("dark");
+        themeToggle.querySelector(".theme-toggle-inner").textContent = "🌙";
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    // Initialize
+    applyTranslations();
+    applyFilters();
+    updateCartCount();
+    
+    // Check for saved theme preference
+    if (localStorage.getItem("theme") === "light") {
+      toggleTheme();
+    }
+
+    // Add voice button to chatbot
+    const voiceButton = document.createElement('button');
+    voiceButton.textContent = '🎤';
+    voiceButton.className = 'ml-2';
+    voiceButton.onclick = startVoiceRecognition;
+    document.querySelector('.chatbot-input').appendChild(voiceButton);
+
+    // Initialize speech synthesis voices when they become available
+    window.speechSynthesis.onvoiceschanged = function() {
+      // Voices are now loaded
+    };
+  </script>
+</body>
+</html>

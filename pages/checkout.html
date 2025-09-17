@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout - FertilizeX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #ecfccb, #d9f99d, #bbf7d0);
+      animation: bgAnimate 15s ease infinite alternate;
+      min-height: 100vh;
+    }
+    @keyframes bgAnimate {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+    }
+    .fade-in {
+      animation: fadeIn 0.8s ease-out both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .qr-code {
+      max-width: 150px;
+      margin-top: 0.5rem;
+      transition: opacity 0.3s ease;
+    }
+    .fade-visible {
+      opacity: 1 !important;
+      display: block !important;
+    }
+    .fade-hidden {
+      opacity: 0;
+      display: none !important;
+    }
+    input:focus, textarea:focus {
+      box-shadow: 0 0 8px 2px #22c55e;
+      outline: none;
+    }
+    .payment-option {
+      transition: max-height 0.4s ease, opacity 0.4s ease;
+      overflow: hidden;
+    }
+    /* Scrollbar for order summary */
+    #cartItems::-webkit-scrollbar {
+      width: 6px;
+    }
+    #cartItems::-webkit-scrollbar-thumb {
+      background-color: #22c55e;
+      border-radius: 3px;
+    }
+    .error-text {
+      color: #dc2626; /* red-600 */
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    .payment-logo {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .bank-info {
+      margin-top: 10px;
+      background-color: #d1fae5; /* green-100 */
+      padding: 10px;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #065f46; /* green-900 */
+    }
+  </style>
+</head>
+<body class="text-gray-800">
+ <!-- NAVBAR -->
+  <nav class="w-full bg-green-700 text-white py-4 shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6">
+      <h1 class="text-xl font-bold">🌿 FertilizeX</h1>
+      <a href="products.html" class="bg-white text-green-700 px-4 py-2 rounded shadow hover:bg-gray-100 transition">
+        Go to Products
+      </a>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6">
+    <h2 class="text-4xl font-bold text-green-700 text-center mb-10 fade-in">🛒 Checkout</h2>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Billing Info -->
+      <div class="md:col-span-2 fade-in space-y-6">
+        <div class="glass p-6 rounded-xl">
+          <h3 class="text-2xl font-semibold mb-4 text-green-800">Billing Information</h3>
+          <form id="billingForm" class="space-y-4" autocomplete="off" novalidate>
+            <div>
+              <input id="name" name="name" required placeholder="Full Name" class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+              <p id="error-name" class="error-text hidden">Please enter your full name.</p>
+            </div>
+            <div>
+              <input id="email" name="email" required placeholder="Email Address" type="email" class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+              <p id="error-email" class="error-text hidden">Please enter a valid email address.</p>
+            </div>
+            <div>
+              <input id="phone" name="phone" required placeholder="Phone Number" type="tel" pattern="^\d{10}$" class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+              <p id="error-phone" class="error-text hidden">Please enter a valid 10-digit phone number.</p>
+            </div>
+            <div>
+              <textarea id="address" name="address" required rows="3" placeholder="Shipping Address" class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none resize-none"></textarea>
+              <p id="error-address" class="error-text hidden">Please enter your shipping address.</p>
+            </div>
+
+            <!-- Payment Methods -->
+            <fieldset class="mt-6 border-t pt-6">
+              <legend class="text-xl font-semibold text-green-800 mb-4">Payment Method</legend>
+              <p id="error-payment" class="error-text hidden mb-4">Please select a payment method.</p>
+
+              <div class="space-y-4">
+                <!-- Cash on Delivery -->
+                <label class="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name="payment" value="cash" checked class="form-radio text-green-600" />
+                  <img src="../images/Cash.jpg" alt="Cash Icon" class="payment-logo" />
+                  <span>Cash on Delivery</span>
+                </label>
+
+                <!-- UPI Payment -->
+                <label class="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name="payment" value="upi" class="form-radio text-green-600" />
+                  <img src="../images/Upi.jpg" alt="UPI Icon" class="payment-logo" />
+                  <span>UPI (PhonePe / Google Pay / Paytm)</span>
+                </label>
+                <div id="upiOptions" class="payment-option max-h-0 opacity-0 ml-7 mt-2 space-y-4">
+                  <p id="error-upiType" class="error-text hidden mb-2">Please select a UPI payment option.</p>
+                  <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="upiType" value="phonepe" class="form-radio text-green-600" />
+                    <img src="../images/Phonepay.jpg" alt="PhonePe Logo" class="payment-logo" />
+                    <span>PhonePe</span>
+                  </label>
+                  <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="upiType" value="gpay" class="form-radio text-green-600" />
+                    <img src="../images/Googlepay.jpg" alt="Google Pay Logo" class="payment-logo" />
+                    <span>Google Pay</span>
+                  </label>
+                  <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="radio" name="upiType" value="paytm" class="form-radio text-green-600" />
+                    <img src="../images/Paytm.jpg" alt="Paytm Logo" class="payment-logo" />
+                    <span>Paytm</span>
+                  </label>
+
+                  <!-- QR Codes -->
+                  <div id="qrPhonePe" class="qr-code fade-hidden">
+                    <img src="../images/Phonepay Qr.jpg" alt="PhonePe QR Code" />
+                  </div>
+                  <div id="qrGPay" class="qr-code fade-hidden">
+                    <img src="../images/GooglepayQr.jpg" alt="Google Pay QR Code" />
+                  </div>
+                  <div id="qrPaytm" class="qr-code fade-hidden">
+                    <img src="../images/PaytmQr.jpg" alt="Paytm QR Code" />
+                  </div>
+                </div>
+
+                <!-- Debit/Credit Card -->
+                <label class="flex items-center space-x-3 cursor-pointer">
+                  <input type="radio" name="payment" value="card" class="form-radio text-green-600" />
+                  <img src="../images/Debitcredit card.jpg" alt="Card Icon" class="payment-logo" />
+                  <span>Debit/Credit Card</span>
+                </label>
+                <div id="cardDetails" class="payment-option max-h-0 opacity-0 mt-2 ml-7 space-y-4">
+                  <p id="error-card" class="error-text hidden mb-2">Please fill all card details correctly.</p>
+                  <input type="text" name="cardNumber" id="cardNumber" placeholder="Card Number" maxlength="19"
+                    class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+                  <div class="flex gap-4 flex-col sm:flex-row">
+                    <input type="text" name="cardExpiry" id="cardExpiry" placeholder="Expiry MM/YY" maxlength="5"
+                      class="flex-1 px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+                    <input type="text" name="cardCVC" id="cardCVC" placeholder="CVC" maxlength="4"
+                      class="w-24 px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+                  </div>
+                  <input type="text" name="cardName" id="cardName" placeholder="Name on Card"
+                    class="w-full px-4 py-3 border rounded-lg focus:ring-green-500 focus:outline-none" />
+                  
+                  <!-- Bank info display -->
+                  <div id="bankInfo" class="bank-info hidden"></div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="glass p-6 rounded-xl fade-in space-y-6">
+        <h3 class="text-2xl font-semibold text-green-800 mb-4">Order Summary</h3>
+        <div id="cartItems" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+        <div class="text-right font-bold text-xl border-t pt-4">
+          Total: ₹<span id="totalAmount">0</span>
+        </div>
+        <button id="confirmBtn" onclick="confirmOrder()" disabled class="w-full bg-green-400 text-white py-3 rounded-lg cursor-not-allowed text-lg transition hover:bg-green-700 disabled:cursor-not-allowed">
+          Confirm Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get cart from localStorage
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Map product names to images (relative to pages folder)
+    const images = {
+      "Urea": "../images/Urea.jpg",
+      "DAP": "../images/DAP.jpg",
+      "Potash": "../images/Potash.jpg",
+      "Compost": "../images/Compost.jpg",
+      "NPK 20-20-20": "../images/NPK.jpg",
+      "Ammonium Sulfate": "../images/Ammonium Sulphate.jpg",
+      "Calcium Nitrate": "../images/calcium nitrate.jpg",
+      "Magnesium Sulfate": "../images/Magnesium Sulfate.jpg",
+      "Rock Phosphate": "../images/Rock Phosphate.jpg",
+      "Gypsum": "../images/Gypsum.jpg",
+      "Humic Acid": "../images/Humic acid.jpg",
+      "Kelp Extract": "../images/Kelp Extract.jpg",
+      "Azospirillum": "../images/Azospirillum.jpg",
+      "Rhizobium": "../images/Rhizobium.jpg",
+      "Bacillus Thuringiensis": "../images/bacillus thuringiensis.jpg",
+      "Liquid Urea": "../images/Liquid Urea.jpg",
+      "Liquid NPK 20-10-10": "../images/Liquid NPK-20-10-10.jpg",
+      "Seaweed Liquid": "../images/Seaweed Liquid.jpg",
+      "Borax": "../images/Borax.jpg",
+      "Zinc Sulfate": "../images/Zinc Sulfate.jpg",
+      "Chelated Iron": "../images/Chelated Iron.jpg",
+      "Cow Manure": "../images/Cow Manure.jpg",
+      "Poultry Manure": "../images/Poultry Manure.jpg",
+      "Vermicompost": "../images/Vermicompost.jpg",
+      "Biochar": "../images/Bio Char.jpg",
+      "Superphosphate": "../images/Super Phosphate.jpg",
+      "Urea Formaldehyde": "../images/urea formaldehyde.jpg",
+      "Muriate of Potash": "../images/Muriate of Potash.jpg",
+      "Sulphate of Potash": "../images/Sulphate of Potash.jpg",
+      "Dolomite Lime": "../images/Dolomite Lime.jpg",
+    };
+
+    // Render cart items and total
+function renderCart() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const cartContainer = document.getElementById("cartItems");
+  const totalAmount = document.getElementById("totalAmount");
+  cartContainer.innerHTML = "";
+  let total = 0;
+
+  if (cart.length === 0) {
+    cartContainer.innerHTML = `<p>Your cart is empty.</p>`;
+    totalAmount.textContent = "0";
+    return;
+  }
+
+  cart.forEach((item, index) => {
+    // Ensure name is a string or fallback
+     const name = (item.name && typeof item.name.en === "string") ? item.name.en : "Unknown Product";
+
+  const price = typeof item.price === "number" ? item.price : 0;
+  const quantity = typeof item.quantity === "number" ? item.quantity : 1;
+
+  const imageUrl = item.image || fertilizerImages[name] || "https://via.placeholder.com/150";
+  const subtotal = price * quantity;
+  total += subtotal;
+    const itemCard = document.createElement("div");
+    itemCard.className = "glass p-4 rounded-2xl shadow-xl flex gap-4 items-start fade-in";
+    itemCard.setAttribute("data-index", index);
+
+    itemCard.innerHTML = `
+      <img src="${imageUrl}" alt="${name}" class="w-28 h-28 object-cover rounded-xl border shadow-md" />
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-green-800">${name}</h3>
+        <p class="text-gray-700 mt-1">Price: ₹${price}</p>
+        <p class="mt-2 font-bold text-gray-900">Quantity: ${quantity}</p>
+        <p class="mt-2 font-bold text-gray-900">Subtotal: ₹${subtotal}</p>
+      </div>
+      <div class="self-center">
+        <button onclick="removeItem(${index})"
+          class="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded-md text-sm transition duration-300">
+          Remove
+        </button>
+      </div>
+    `;
+    cartContainer.appendChild(itemCard);
+  });
+
+  totalAmount.textContent = total;
+}
+
+
+    // Remove item from cart
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      renderCart();
+    }
+
+    // Payment UI Elements
+    const paymentRadios = document.querySelectorAll('input[name="payment"]');
+    const upiOptions = document.getElementById("upiOptions");
+    const cardDetails = document.getElementById("cardDetails");
+    const confirmBtn = document.getElementById("confirmBtn");
+
+    // Error elements
+    const errorName = document.getElementById("error-name");
+    const errorEmail = document.getElementById("error-email");
+    const errorPhone = document.getElementById("error-phone");
+    const errorAddress = document.getElementById("error-address");
+    const errorPayment = document.getElementById("error-payment");
+    const errorUpiType = document.getElementById("error-upiType");
+    const errorCard = document.getElementById("error-card");
+
+    // Bank info element
+    const bankInfoDiv = document.getElementById("bankInfo");
+
+    // Enable confirm button only if payment method is selected
+    function updateConfirmButtonState() {
+      const selectedPayment = document.querySelector('input[name="payment"]:checked');
+      confirmBtn.disabled = !selectedPayment || cart.length === 0;
+      if (confirmBtn.disabled) {
+        confirmBtn.classList.add("bg-green-400", "cursor-not-allowed");
+        confirmBtn.classList.remove("bg-green-600", "hover:bg-green-700", "cursor-pointer");
+      } else {
+        confirmBtn.classList.remove("bg-green-400", "cursor-not-allowed");
+        confirmBtn.classList.add("bg-green-600", "hover:bg-green-700", "cursor-pointer");
+      }
+    }
+
+    paymentRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        if (radio.value === "upi") {
+          upiOptions.style.maxHeight = "500px";
+          upiOptions.style.opacity = "1";
+          cardDetails.style.maxHeight = "0";
+          cardDetails.style.opacity = "0";
+          resetUPISelection();
+          bankInfoDiv.classList.add("hidden");
+        } else if (radio.value === "card") {
+          cardDetails.style.maxHeight = "500px";
+          cardDetails.style.opacity = "1";
+          upiOptions.style.maxHeight = "0";
+          upiOptions.style.opacity = "0";
+          resetUPISelection();
+          if (document.getElementById("cardNumber").value.trim() !== "") {
+            extractBankDetails();
+          } else {
+            bankInfoDiv.classList.add("hidden");
+          }
+        } else {
+          upiOptions.style.maxHeight = "0";
+          upiOptions.style.opacity = "0";
+          cardDetails.style.maxHeight = "0";
+          cardDetails.style.opacity = "0";
+          resetUPISelection();
+          bankInfoDiv.classList.add("hidden");
+        }
+        clearErrors();
+        updateConfirmButtonState();
+      });
+    });
+
+    // UPI radio buttons and QR code display
+    const upiRadios = document.querySelectorAll('input[name="upiType"]');
+    const qrPhonePe = document.getElementById("qrPhonePe");
+    const qrGPay = document.getElementById("qrGPay");
+    const qrPaytm = document.getElementById("qrPaytm");
+
+    function resetUPISelection() {
+      upiRadios.forEach(r => r.checked = false);
+      qrPhonePe.classList.add("fade-hidden");
+      qrPhonePe.classList.remove("fade-visible");
+      qrGPay.classList.add("fade-hidden");
+      qrGPay.classList.remove("fade-visible");
+      qrPaytm.classList.add("fade-hidden");
+      qrPaytm.classList.remove("fade-visible");
+      errorUpiType.classList.add("hidden");
+    }
+
+    upiRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        qrPhonePe.classList.add("fade-hidden");
+        qrPhonePe.classList.remove("fade-visible");
+        qrGPay.classList.add("fade-hidden");
+        qrGPay.classList.remove("fade-visible");
+        qrPaytm.classList.add("fade-hidden");
+        qrPaytm.classList.remove("fade-visible");
+
+        if (radio.value === "phonepe") qrPhonePe.classList.replace("fade-hidden", "fade-visible");
+        else if (radio.value === "gpay") qrGPay.classList.replace("fade-hidden", "fade-visible");
+        else if (radio.value === "paytm") qrPaytm.classList.replace("fade-hidden", "fade-visible");
+      });
+    });
+
+    // Card input elements
+    const cardNumberInput = document.getElementById("cardNumber");
+    const cardExpiryInput = document.getElementById("cardExpiry");
+    const cardCVCInput = document.getElementById("cardCVC");
+    const cardNameInput = document.getElementById("cardName");
+
+    // On card number input, extract bank info live
+    cardNumberInput.addEventListener("input", () => {
+      extractBankDetails();
+      errorCard.classList.add("hidden");
+    });
+
+    function clearErrors() {
+      errorName.classList.add("hidden");
+      errorEmail.classList.add("hidden");
+      errorPhone.classList.add("hidden");
+      errorAddress.classList.add("hidden");
+      errorPayment.classList.add("hidden");
+      errorUpiType.classList.add("hidden");
+      errorCard.classList.add("hidden");
+    }
+
+    // Simple bank BIN data for demo
+    const bankBinData = {
+      "411111": { bank: "Visa Bank", type: "Visa", country: "India" },
+      "550000": { bank: "MasterCard Bank", type: "MasterCard", country: "India" },
+      "340000": { bank: "American Express Bank", type: "AMEX", country: "India" },
+      "601100": { bank: "Discover Bank", type: "Discover", country: "India" },
+      "622126": { bank: "UnionPay Bank", type: "UnionPay", country: "China" },
+      "353011": { bank: "JCB Bank", type: "JCB", country: "Japan" }
+    };
+
+    function extractBankDetails() {
+      const cardNumRaw = cardNumberInput.value.replace(/\s+/g, '');
+      if (cardNumRaw.length < 6) {
+        bankInfoDiv.classList.add("hidden");
+        return;
+      }
+      const bin = cardNumRaw.slice(0, 6);
+      const bankData = bankBinData[bin];
+      if (bankData) {
+        bankInfoDiv.innerHTML = `
+          <strong>Bank Name:</strong> ${bankData.bank} <br />
+          <strong>Card Type:</strong> ${bankData.type} <br />
+          <strong>Country:</strong> ${bankData.country}
+        `;
+      } else {
+        bankInfoDiv.innerHTML = `<strong>Bank Info:</strong> Unknown BIN (${bin})`;
+      }
+      bankInfoDiv.classList.remove("hidden");
+    }
+
+    function validateEmail(email) {
+      return /^\S+@\S+\.\S+$/.test(email);
+    }
+
+    function validatePhone(phone) {
+      return /^\d{10}$/.test(phone);
+    }
+
+    function validateCardNumber(cardNumber) {
+      const num = cardNumber.replace(/\s+/g, '');
+      return /^\d{13,19}$/.test(num);
+    }
+
+    function validateExpiry(expiry) {
+      if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
+      const [mm, yy] = expiry.split("/").map(Number);
+      if (mm < 1 || mm > 12) return false;
+      const currentYear = new Date().getFullYear() % 100;
+      const currentMonth = new Date().getMonth() + 1;
+      if (yy < currentYear) return false;
+      if (yy === currentYear && mm < currentMonth) return false;
+      return true;
+    }
+
+    function validateCVC(cvc) {
+      return /^\d{3,4}$/.test(cvc);
+    }
+
+    function validateForm() {
+      clearErrors();
+
+      let valid = true;
+      const form = document.getElementById("billingForm");
+      const name = form.elements["name"].value.trim();
+      const email = form.elements["email"].value.trim();
+      const phone = form.elements["phone"].value.trim();
+      const address = form.elements["address"].value.trim();
+      const paymentMethod = form.elements["payment"].value;
+
+      if (!name) {
+        errorName.classList.remove("hidden");
+        valid = false;
+      }
+      if (!email || !validateEmail(email)) {
+        errorEmail.classList.remove("hidden");
+        valid = false;
+      }
+      if (!phone || !validatePhone(phone)) {
+        errorPhone.classList.remove("hidden");
+        valid = false;
+      }
+      if (!address) {
+        errorAddress.classList.remove("hidden");
+        valid = false;
+      }
+      if (!paymentMethod) {
+        errorPayment.classList.remove("hidden");
+        valid = false;
+      }
+
+      if (paymentMethod === "upi") {
+        const upiType = form.elements["upiType"].value;
+        if (!upiType) {
+          errorUpiType.classList.remove("hidden");
+          valid = false;
+        }
+      }
+
+      if (paymentMethod === "card") {
+        const cardNumber = form.elements["cardNumber"].value.trim();
+        const cardExpiry = form.elements["cardExpiry"].value.trim();
+        const cardCVC = form.elements["cardCVC"].value.trim();
+        const cardName = form.elements["cardName"].value.trim();
+        if (
+          !cardNumber || !validateCardNumber(cardNumber) ||
+          !cardExpiry || !validateExpiry(cardExpiry) ||
+          !cardCVC || !validateCVC(cardCVC) ||
+          !cardName
+        ) {
+          errorCard.classList.remove("hidden");
+          valid = false;
+        }
+      }
+
+      return valid;
+    }
+
+    function generateTransactionId() {
+      return "TXN-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+    }
+
+    function confirmOrder() {
+      if (cart.length === 0) {
+        alert("Cart is empty!");
+        return;
+      }
+
+      if (!validateForm()) {
+        // Scroll to first error
+        const firstError = document.querySelector(".error-text:not(.hidden)");
+        if (firstError) firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      const form = document.getElementById("billingForm");
+      const paymentMethod = form.elements["payment"].value;
+
+      const billingInfo = {
+        name: form.elements["name"].value.trim(),
+        email: form.elements["email"].value.trim(),
+        phone: form.elements["phone"].value.trim(),
+        address: form.elements["address"].value.trim(),
+        paymentMethod,
+        ...(paymentMethod === "upi" ? { upiType: form.elements["upiType"].value } : {}),
+      };
+
+      if (paymentMethod === "card") {
+        billingInfo.cardDetails = {
+          cardNumber: form.elements["cardNumber"].value.trim(),
+          cardExpiry: form.elements["cardExpiry"].value.trim(),
+          cardCVC: form.elements["cardCVC"].value.trim(),
+          cardName: form.elements["cardName"].value.trim(),
+          bankInfo: bankInfoDiv.textContent || ""
+        };
+      }
+
+      localStorage.setItem("billingInfo", JSON.stringify(billingInfo));
+
+      const transactionDetails = {
+        transactionId: generateTransactionId(),
+        paymentMode: paymentMethod === "upi"
+          ? `UPI (${form.elements["upiType"].value.toUpperCase()})`
+          : paymentMethod === "card"
+            ? "Debit/Credit Card"
+            : paymentMethod === "cash"
+              ? "Cash on Delivery"
+              : paymentMethod,
+        paymentStatus: "Paid"
+      };
+
+      localStorage.setItem("transactionDetails", JSON.stringify(transactionDetails));
+
+      alert("🎉 Order Confirmed!");
+      setTimeout(() => {
+        window.location.href = "order-success.html";
+      }, 1000);
+    }
+
+    // Initialize
+    renderCart();
+    updateConfirmButtonState();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agro Target FertilizeX</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+Telugu:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #2a9d8f;
+            --secondary-color: #e9c46a;
+            --background-color: #f4f1de;
+            --text-color: #264653;
+            --white-color: #ffffff;
+            --danger-color: #e76f51;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Roboto', 'Noto Sans Telugu', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.75);
+            z-index: -1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 3rem;
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            box-shadow: var(--shadow);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            height: 50px;
+            width: auto;
+        }
+
+        .home-link {
+            color: var(--white-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .home-link:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            transition: color 0.3s ease;
+        }
+
+        .logo-container:hover .title {
+            color: var(--secondary-color);
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        .sidebar {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sidebar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 700;
+            margin-bottom: -0.5rem;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background-color: var(--white-color);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        select:focus, input[type="range"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(42, 157, 143, 0.5);
+        }
+
+        input[type="range"] {
+            padding: 0;
+        }
+
+        #phValue {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        button {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #228a7e;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            border-left: 5px solid var(--secondary-color);
+            min-height: 100px;
+        }
+
+        .result-box h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .result-box p {
+            margin: 0.5rem 0;
+        }
+        .result-box ul {
+            padding-left: 20px;
+            margin: 0.5rem 0 0 0;
+        }
+
+        /* Language Toggle Switch */
+        .lang-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: bold;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--secondary-color);
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider {
+            background-color: var(--secondary-color);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider.round {
+            border-radius: 34px;
+        }
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <a href="../index.html" class="home-link" data-lang-key="home_link">Home</a>
+            <img src="../images/Logo.jpg" alt="Agro Target Logo" class="logo-image">
+            <h1 class="title" data-lang-key="title">Agro Target FertilizeX</h1>
+        </div>
+        <div class="lang-container">
+            <span data-lang-key="en_lang">EN</span>
+            <label class="switch">
+                <input type="checkbox" id="languageToggle">
+                <span class="slider round"></span>
+            </label>
+            <span data-lang-key="te_lang">TE</span>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <aside class="sidebar">
+            <h2 data-lang-key="crop_recommendation_title">Crop Recommendation</h2>
+            <form id="cropForm">
+                <label for="state" data-lang-key="state_label">State</label>
+                <select id="state" name="state" required></select>
+
+                <label for="district" data-lang-key="district_label">District</label>
+                <select id="district" name="district" required>
+                    <option value="" data-lang-key="select_state_first">-- Select State First --</option>
+                </select>
+
+                <label for="soilTypeCrop" data-lang-key="soil_type_label">Soil Type</label>
+                <select id="soilTypeCrop" name="soilTypeCrop" required></select>
+
+                <button type="button" id="cropBtn" data-lang-key="get_crop_recommendation">Get Recommendation</button>
+            </form>
+            <div id="cropResult" class="result-box"></div>
+        </aside>
+
+        <aside class="sidebar">
+            <h2 data-lang-key="fertilizer_recommendation_title">Fertilizer Recommendation</h2>
+            <form id="fertilizerForm">
+                <label for="cropType" data-lang-key="crop_type_label">Crop Type</label>
+                <select id="cropType" name="cropType" required></select>
+
+                <label for="soilTypeFertilizer" data-lang-key="soil_type_label">Soil Type</label>
+                <select id="soilTypeFertilizer" name="soilTypeFertilizer" required></select>
+
+                <label for="season" data-lang-key="season_label">Season</label>
+                <select id="season" name="season" required></select>
+                
+                <label for="soilPh" data-lang-key="ph_label">Soil pH Value (0-7)</label>
+                <input type="range" id="soilPh" name="soilPh" min="0" max="7" step="0.1" value="5.5">
+                <span id="phValue">pH: 5.5</span>
+
+                <button type="button" id="fertBtn" data-lang-key="get_fertilizer_recommendation">Get Recommendation</button>
+            </form>
+            <div id="fertilizerResult" class="result-box"></div>
+        </aside>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATABASE ---
+            const db = {
+                languageContent: {
+                    en: {
+                        home_link: "Home",
+                        title: "Agro Target fertilizeX",
+                        en_lang: "EN",
+                        te_lang: "TE",
+                        crop_recommendation_title: "Crop Recommendation",
+                        fertilizer_recommendation_title: "Fertilizer Recommendation",
+                        state_label: "State",
+                        district_label: "District",
+                        soil_type_label: "Soil Type",
+                        crop_type_label: "Crop Type",
+                        season_label: "Season",
+                        ph_label: "Soil pH Value (0-7)",
+                        get_crop_recommendation: "Get Crop Recommendation",
+                        get_fertilizer_recommendation: "Get Fertilizer Recommendation",
+                        select_state_first: "-- Select State First --",
+                        select_an_option: "-- Select an Option --",
+                        recommendation_for: "Recommendation for you:",
+                        crop_name: "Crop Name",
+                        crop_tips: "Cultivation Tips:",
+                        fertilizer_name: "Fertilizer Name",
+                        fertilizer_tips: "Usage & Benefits:",
+                    },
+                    te: {
+                        home_link: "హోమ్",
+                        title: "అగ్రో టార్గెట్ ఫెర్టిలైజ్‌ఎక్స్",
+                        en_lang: "EN",
+                        te_lang: "TE",
+                        crop_recommendation_title: "పంట సిఫార్సు",
+                        fertilizer_recommendation_title: "ఎరువుల సిఫార్సు",
+                        state_label: "రాష్ట్రం",
+                        district_label: "జిల్లా",
+                        soil_type_label: "నేల రకం",
+                        crop_type_label: "పంట రకం",
+                        season_label: "సీజన్",
+                        ph_label: "నేల pH విలువ (0-7)",
+                        get_crop_recommendation: "పంట సిఫార్సును పొందండి",
+                        get_fertilizer_recommendation: "ఎరువుల సిఫార్సును పొందండి",
+                        select_state_first: "-- ముందుగా రాష్ట్రాన్ని ఎంచుకోండి --",
+                        select_an_option: "-- ఒక ఎంపికను ఎంచుకోండి --",
+                        recommendation_for: "మీ కోసం సిఫార్సు:",
+                        crop_name: "పంట పేరు",
+                        crop_tips: "సాగు చిట్కాలు:",
+                        fertilizer_name: "ఎరువు పేరు",
+                        fertilizer_tips: "వినియోగం & ప్రయోజనాలు:",
+                    }
+                },
+                stateNames: {
+                    en: ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
+                    te: ["ఆంధ్ర ప్రదేశ్", "అరుణాచల్ ప్రదేశ్", "అస్సాం", "బీహార్", "ఛత్తీస్‌గఢ్", "గోవా", "గుజరాత్", "హర్యానా", "హిమాచల్ ప్రదేశ్", "జార్ఖండ్", "కర్ణాటక", "కేరళ", "మధ్య ప్రదేశ్", "మహారాష్ట్ర", "మణిపూర్", "మేఘాలయ", "మిజోరం", "నాగాలాండ్", "ఒడిశా", "పంజాబ్", "రాజస్థాన్", "సిక్కిం", "తమిళనాడు", "తెలంగాణ", "త్రిపుర", "ఉత్తర ప్రదేశ్", "ఉత్తరాఖండ్", "పశ్చిమ బెంగాల్"]
+                },
+                statesAndDistricts: {
+                    "Andhra Pradesh": {
+                        en: ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Prakasam", "Srikakulam", "Visakhapatnam", "West Godavari", "YSR Kadapa"],
+                        te: ["అనంతపురం", "చిత్తూరు", "తూర్పు గోదావరి", "గుంటూరు", "కృష్ణా", "కర్నూలు", "ప్రకాశం", "శ్రీకాకుళం", "విశాఖపట్నం", "పశ్చిమ గోదావరి", "వైఎస్ఆర్ కడప"]
+                    },
+                    "Arunachal Pradesh": {
+                        en: ["Tawang", "West Kameng", "East Kameng", "Papum Pare", "Lower Subansiri", "Upper Subansiri", "West Siang", "East Siang", "Upper Siang", "Lohit", "Dibang Valley"],
+                        te: ["తవాంగ్", "పశ్చిమ కమెంగ్", "తూర్పు కమెంగ్", "పాపుమ్ పరే", "దిగువ సుబన్‌సిరి", "ఎగువ సుబన్‌సిరి", "పశ్చిమ సియాంగ్", "తూర్పు సియాంగ్", "ఎగువ సియాంగ్", "లోహిత్", "దిబాంగ్ వ్యాలీ"]
+                    },
+                    "Assam": {
+                        en: ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Jorhat", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "Tinsukia"],
+                        te: ["బక్సా", "బార్పేట", "విశ్వనాథ్", "బొంగైగావ్", "కచార్", "చరాయిడియో", "చిరాంగ్", "దర్రాంగ్", "ధేమాజీ", "ధుబ్రి", "దిబ్రూగర్", "గోల్‌పారా", "గోలాఘాట్", "హైలకండి", "జోర్హాట్", "కామ్రూప్ మెట్రోపాలిటన్", "కర్బీ ఆంగ్లాంగ్", "కరీంగంజ్", "కోక్రాఝర్", "లఖింపూర్", "మజులి", "మోరిగావ్", "నగావ్", "నల్బరి", "శివసాగర్", "సోనిత్‌పూర్", "తిన్‌సుకియా"]
+                    },
+                    "Bihar": {
+                        en: ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+                        te: ["అరారియా", "అర్వాల్", "ఔరంగాబాద్", "బంకా", "బేగుసరాయ్", "భాగల్పూర్", "భోజ్‌పూర్", "బక్సర్", "దర్భంగా", "తూర్పు చంపారన్", "గయా", "గోపాల్‌గంజ్", "జాముయి", "జెహనాబాద్", "కైమూర్", "కతిహార్", "ఖగారియా", "కిషన్‌గంజ్", "లఖిసరాయ్", "మాధేపురా", "మధుబని", "ముంగేర్", "ముజఫర్‌పూర్", "నలంద", "నవాడా", "పాట్నా", "పూర్ణియా", "రోహ్‌తాస్", "సహర్సా", "సమస్తిపూర్", "శరన్", "షేక్‌పురా", "షోహర్", "సీతామర్హి", "సివాన్", "సుపాల్", "వైశాలి", "పశ్చిమ చంపారన్"]
+                    },
+                    "Chhattisgarh": {
+                        en: ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Koriya", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+                        te: ["బాలోద్", "బలోడా బజార్", "బలరాంపూర్", "బస్తర్", "బెమెతరా", "బీజాపూర్", "బిలాస్‌పూర్", "దంతేవాడ", "ధమ్తరి", "దుర్గ్", "గరియాబంద్", "జంజ్‌గిర్-చంపా", "జశ్‌పూర్", "కబీర్‌ధామ్", "కంకేర్", "కొండగావ్", "కోర్బా", "కోరియా", "మహాసముంద్", "ముంగేలి", "నారాయణపూర్", "రాయ్‌గఢ్", "రాయ్‌పూర్", "రాజ్‌నంద్‌గావ్", "సుక్మా", "సూరజ్‌పూర్", "సుర్గుజా"]
+                    },
+                    "Goa": {
+                        en: ["North Goa", "South Goa"],
+                        te: ["ఉత్తర గోవా", "దక్షిణ గోవా"]
+                    },
+                    "Gujarat": {
+                        en: ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+                        te: ["అహ్మదాబాద్", "అమ్రేలి", "ఆనంద్", "అరవల్లి", "బనస్కాంత", "భరూచ్", "భావ్‌నగర్", "బోటాద్", "ఛోటా ఉదయ్‌పూర్", "దాహోద్", "డాంగ్", "దేవభూమి ద్వారక", "గాంధీనగర్", "గిర్ సోమనాథ్", "జామ్‌నగర్", "జునాగఢ్", "ఖేడా", "కచ్", "మహీసాగర్", "మెహసానా", "మోర్బి", "నర్మదా", "నవ్‌సారి", "పంచమహల్", "పటాన్", "పోర్‌బందర్", "రాజ్‌కోట్", "సబర్‌కాంత", "సూరత్", "సురేంద్రనగర్", "తాపి", "వడోదర", "వల్సాద్"]
+                    },
+                    "Haryana": {
+                        en: ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+                        te: ["అంబాలా", "భివాని", "చర్ఖీ దాద్రి", "ఫరీదాబాద్", "ఫతేహాబాద్", "గురుగ్రామ్", "హిసార్", "ఝజ్జర్", "జింద్", "కైతాల్", "కర్నాల్", "కురుక్షేత్ర", "మహేంద్రగఢ్", "నుహ్", "పల్వాల్", "పంచకుల", "పానిపట్", "రేవారి", "రోహ్‌తక్", "సిర్సా", "సోనిపట్", "యమునానగర్"]
+                    },
+                    "Himachal Pradesh": {
+                        en: ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul & Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+                        te: ["బిలాస్‌పూర్", "చంబా", "హమీర్‌పూర్", "కాంగ్రా", "కిన్నౌర్", "కులు", "లాహౌల్ & స్పితి", "మండి", "సిమ్లా", "సిర్మౌర్", "సోలన్", "ఉనా"]
+                    },
+                    "Jharkhand": {
+                        en: ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahebganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"],
+                        te: ["బొకారో", "ఛత్రా", "దేవ్‌గఢ్", "ధన్‌బాద్", "దుమ్కా", "తూర్పు సింగ్‌భూమ్", "గఢ్వా", "గిరిడిహ్", "గొడ్డా", "గుమ్లా", "హజారీబాగ్", "జమ్తారా", "ఖుంటి", "కోడెర్మా", "లతేహార్", "లోహార్‌దగా", "పాకూర్", "పలామూ", "రామ్‌గఢ్", "రాంచీ", "సాహెబ్‌గంజ్", "సెరైకెలా ఖర్సావాన్", "సిమ్‌డేగా", "పశ్చిమ సింగ్‌భూమ్"]
+                    },
+                    "Karnataka": {
+                        en: ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+                        te: ["బాగల్‌కోట్", "బళ్లారి", "బెళగావి", "బెంగళూరు గ్రామీణ", "బెంగళూరు పట్టణ", "బీదర్", "చామరాజనగర్", "చిక్కబళ్లాపుర", "చిక్కమగళూరు", "చిత్రదుర్గ", "దక్షిణ కన్నడ", "దావణగెరె", "ధార్వాడ్", "గదగ్", "హాసన్", "హావేరి", "కలబురగి", "కొడగు", "కోలార్", "కొప్పళ్", "మాండ్య", "మైసూరు", "రాయచూరు", "రామనగర", "శివమొగ్గ", "తుమకూరు", "ఉడిపి", "ఉత్తర కన్నడ", "విజయపుర", "యాద్గిర్"]
+                    },
+                    "Kerala": {
+                        en: ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+                        te: ["ఆలప్పుళ", "ఎర్నాకుళం", "ఇడుక్కి", "కన్నూర్", "కాసరగోడ్", "కొల్లం", "కొట్టాయం", "కోజికోడ్", "మలప్పురం", "పాలక్కాడ్", "పతనంతిట్ట", "తిరువనంతపురం", "త్రిస్సూర్", "వయనాడ్"]
+                    },
+                    "Madhya Pradesh": {
+                        en: ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+                        te: ["అగర్ మాల్వా", "అలీరాజ్‌పూర్", "అనుప్పూర్", "అశోక్‌నగర్", "బాలాఘాట్", "బర్వానీ", "బేతుల్", "భిండ్", "భోపాల్", "బుర్హాన్‌పూర్", "ఛతర్‌పూర్", "ఛింద్వారా", "దామోహ్", "దతియా", "దేవాస్", "ధార్", "దిండోరి", "గునా", "గ్వాలియర్", "హర్దా", "హోషంగాబాద్", "ఇండోర్", "జబల్‌పూర్", "ఝబువా", "కట్నీ", "ఖాండ్వా", "ఖర్‌గోన్", "మాండ్లా", "మంద్‌సౌర్", "మొరేనా", "నరసింగ్‌పూర్", "నీమచ్", "పన్నా", "రాయ్‌సేన్", "రాజ్‌గఢ్", "రత్లాం", "రేవా", "సాగర్", "సత్నా", "సెహోర్", "సియోని", "షాడోల్", "షాజాపూర్", "షియోపూర్", "శివపురి", "సిధి", "సింగ్రౌలి", "టీకమ్‌గఢ్", "ఉజ్జయిని", "ఉమరియా", "విదిశ"]
+                    },
+                    "Maharashtra": {
+                        en: ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+                        te: ["అహ్మద్‌నగర్", "అకోలా", "అమరావతి", "ఔరంగాబాద్", "బీడ్", "భండారా", "బుల్దానా", "చంద్రపూర్", "ధూలే", "గడ్చిరోలి", "గోండియా", "హింగోలి", "జలగావ్", "జల్నా", "కొల్హాపూర్", "లాతూర్", "ముంబై నగరం", "ముంబై సబర్బన్", "నాగ్‌పూర్", "నాందేడ్", "నందుర్బార్", "నాసిక్", "ఉస్మానాబాద్", "పాల్ఘర్", "పర్భణీ", "పుణె", "రాయ్‌గఢ్", "రత్నగిరి", "సాంగ్లీ", "సతారా", "సింధుదుర్గ్", "సోలాపూర్", "ఠాణె", "వార్ధా", "వాషిమ్", "యవత్మాల్"]
+                    },
+                    "Manipur": {
+                        en: ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
+                        te: ["బిష్ణుపూర్", "చాందెల్", "చురాచంద్‌పూర్", "ఇంఫాల్ తూర్పు", "ఇంఫాల్ పశ్చిమ", "జిరిబామ్", "కాక్‌చింగ్", "కామ్‌జోంగ్", "కాంగ్‌పోక్పి", "నోనీ", "ఫెర్జావల్", "సేనాపతి", "తమెంగ్‌లాంగ్", "టెంగ్నౌపాల్", "తౌబాల్", "ఉఖ్రుల్"]
+                    },
+                    "Meghalaya": {
+                        en: ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+                        te: ["తూర్పు గారో హిల్స్", "తూర్పు జైంతియా హిల్స్", "తూర్పు ఖాసీ హిల్స్", "ఉత్తర గారో హిల్స్", "రి భోయ్", "దక్షిణ గారో హిల్స్", "నైరుతి గారో హిల్స్", "నైరుతి ఖాసీ హిల్స్", "పశ్చిమ గారో హిల్స్", "పశ్చిమ జైంతియా హిల్స్", "పశ్చిమ ఖాసీ హిల్స్"]
+                    },
+                    "Mizoram": {
+                        en: ["Aizawl", "Champhai", "Hnahthial", "Khawzawl", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Saitual", "Serchhip"],
+                        te: ["ఐజ్వాల్", "చంఫై", "హ్నతియాల్", "ఖ్వాజ్వాల్", "కోలాసిబ్", "లవంగ్‌త్లై", "లుంగ్లీ", "మామిత్", "సైహా", "సైతువాల్", "సెర్చిప్"]
+                    },
+                    "Nagaland": {
+                        en: ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"],
+                        te: ["దిమాపూర్", "కిఫిరే", "కోహిమా", "లాంగ్‌లెంగ్", "మొకోక్‌చుంగ్", "మోన్", "పెరెన్", "ఫెక్", "ట్యూన్‌సాంగ్", "వోఖా", "జున్‌హెబోటో"]
+                    },
+                    "Odisha": {
+                        en: ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"],
+                        te: ["అంగుల్", "బలంగీర్", "బాలాసోర్", "బార్గఢ్", "భద్రక్", "బౌధ్", "కటక్", "దేవ్‌గఢ్", "ధెంకనల్", "గజపతి", "గంజాం", "జగత్‌సింగ్‌పూర్", "జాజ్‌పూర్", "ఝార్సుగూడ", "కలహండి", "కంధమాల్", "కేంద్రపారా", "కెందుఝార్", "ఖోర్ధా", "కోరాపుట్", "మల్కన్‌గిరి", "మయూర్‌భంజ్", "నబరంగ్‌పూర్", "నయాగఢ్", "నువాపడ", "పూరి", "రాయగడ", "సంబల్‌పూర్", "సుబర్ణపూర్", "సుందర్‌గఢ్"]
+                    },
+                    "Punjab": {
+                        en: ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Firozpur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar", "Sangrur", "Shahid Bhagat Singh Nagar", "Sri Muktsar Sahib", "Tarn Taran"],
+                        te: ["అమృత్‌సర్", "బర్నాలా", "భటిండా", "ఫరీద్‌కోట్", "ఫతేగఢ్ సాహిబ్", "ఫాజిల్కా", "ఫిరోజ్‌పూర్", "గురుదాస్‌పూర్", "హోషియార్‌పూర్", "జలంధర్", "కపుర్తలా", "లుధియానా", "మాన్సా", "మోగా", "పఠాన్‌కోట్", "పాటియాలా", "రూప్‌నగర్", "సాహిబ్జాదా అజిత్ సింగ్ నగర్", "సంగ్రూర్", "షహీద్ భగత్ సింగ్ నగర్", "శ్రీ ముక్త్సర్ సాహిబ్", "తరన్ తారన్"]
+                    },
+                    "Rajasthan": {
+                        en: ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+                        te: ["అజ్మీర్", "అల్వార్", "బన్స్‌వారా", "బరన్", "బార్మర్", "భరత్‌పూర్", "భిల్వారా", "బికనీర్", "బుంది", "చిత్తోర్‌గఢ్", "చూరు", "దౌసా", "ధోల్‌పూర్", "దుంగర్‌పూర్", "హనుమాన్‌గఢ్", "జైపూర్", "జైసల్మేర్", "జలోర్", "ఝలావర్", "ఝున్‌ఝును", "జోధ్‌పూర్", "కరౌలి", "కోటా", "నాగౌర్", "పాలి", "ప్రతాప్‌గఢ్", "రాజ్‌సమంద్", "సవాయి మాధోపూర్", "సికార్", "సిరోహి", "శ్రీ గంగానగర్", "టోంక్", "ఉదయ్‌పూర్"]
+                    },
+                    "Sikkim": {
+                        en: ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+                        te: ["తూర్పు సిక్కిం", "ఉత్తర సిక్కిం", "దక్షిణ సిక్కిం", "పశ్చిమ సిక్కిం"]
+                    },
+                    "Tamil Nadu": {
+                        en: ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+                        te: ["అరియలూర్", "చెంగల్పట్టు", "చెన్నై", "కోయంబత్తూరు", "కడలూర్", "ధర్మపురి", "దిండిగల్", "ఈరోడ్", "కల్లకురిచి", "కాంచీపురం", "కన్యాకుమారి", "కరూర్", "కృష్ణగిరి", "మదురై", "నాగపట్నం", "నమక్కల్", "నీలగిరి", "పెరంబలూర్", "పుదుక్కోట్టై", "రామనాథపురం", "రాణిపేట్", "సేలం", "శివగంగై", "తేన్కాసి", "తంజావూరు", "తేని", "తూత్తుకుడి", "తిరుచిరాపల్లి", "తిరునెల్వేలి", "తిరుపత్తూరు", "తిరుప్పూర్", "తిరువళ్లూరు", "తిరువణ్ణామలై", "తిరువారూర్", "వేలూరు", "విల్లుపురం", "విరుదునగర్"]
+                    },
+                    "Telangana": {
+                        en: ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Komaram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal-Malkajgiri", "Nagarkurnool", "Nalgonda", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Ranga Reddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+                        te: ["ఆదిలాబాద్", "భద్రాద్రి కొత్తగూడెం", "హైదరాబాద్", "జగిత్యాల", "జనగాం", "జయశంకర్ భూపాలపల్లి", "జోగులాంబ గద్వాల్", "కామారెడ్డి", "కరీంనగర్", "ఖమ్మం", "కొమరం భీం", "మహబూబాబాద్", "మహబూబ్ నగర్", "మంచిర్యాల", "మెదక్", "మేడ్చల్-మల్కాజ్‌గిరి", "నాగర్‌కర్నూల్", "నల్గొండ", "నిర్మల్", "నిజామాబాద్", "పెద్దపల్లి", "రాజన్న సిరిసిల్ల", "రంగారెడ్డి", "సంగారెడ్డి", "సిద్దిపేట", "సూర్యాపేట", "వికారాబాద్", "వనపర్తి", "వరంగల్ గ్రామీణ", "వరంగల్ పట్టణ", "యాదాద్రి భువనగిరి"]
+                    },
+                    "Tripura": {
+                        en: ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+                        te: ["ధలై", "గోమతి", "ఖోవై", "ఉత్తర త్రిపుర", "సెపాహిజాల", "దక్షిణ త్రిపుర", "ఉనకోటి", "పశ్చిమ త్రిపుర"]
+                    },
+                    "Uttar Pradesh": {
+                        en: ["Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddh Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+                        te: ["ఆగ్రా", "అలీగఢ్", "అంబేద్కర్ నగర్", "అమేథీ", "అమ్రోహా", "ఔరయా", "అయోధ్య", "అజంగఢ్", "బాగ్‌పత్", "బహ్రైచ్", "బల్లియా", "బలరాంపూర్", "బందా", "బారాబంకి", "బరేలీ", "బస్తీ", "భదోహి", "బిజ్నోర్", "బుదౌన్", "బులంద్‌షహర్", "చందౌలి", "చిత్రకూట్", "డియోరియా", "ఏటా", "ఇటావా", "ఫరూఖాబాద్", "ఫతేపూర్", "ఫిరోజాబాద్", "గౌతమ్ బుద్ధ నగర్", "ఘజియాబాద్", "ఘాజీపూర్", "గోండా", "గోరఖ్‌పూర్", "హమీర్‌పూర్", "హాపూర్", "హర్దోయ్", "హత్రాస్", "జలౌన్", "జౌన్‌పూర్", "ఝాన్సీ", "కన్నౌజ్", "కాన్పూర్ దేహత్", "కాన్పూర్ నగర్", "కాస్‌గంజ్", "కౌశాంబి", "ఖేరి", "కుషీనగర్", "లలిత్‌పూర్", "లక్నో", "మహారాజ్‌గంజ్", "మహోబా", "మైన్‌పురి", "మధుర", "మౌ", "మీరట్", "మీర్జాపూర్", "మొరాదాబాద్", "ముజఫర్‌నగర్", "పిలిభిత్", "ప్రతాప్‌గఢ్", "ప్రయాగ్‌రాజ్", "రాయ్‌బరేలి", "రాంపూర్", "సహారన్‌పూర్", "సంభల్", "సంత్ కబీర్ నగర్", "షాజహాన్‌పూర్", "షామ్లీ", "శ్రావస్తి", "సిద్ధార్థనగర్", "సీతాపూర్", "సోన్‌భద్ర", "సుల్తాన్‌పూర్", "ఉన్నావ్", "వారణాసి"]
+                    },
+                    "Uttarakhand": {
+                        en: ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+                        te: ["అల్మోరా", "బాగేశ్వర్", "చమోలి", "చంపావత్", "డెహ్రాడూన్", "హరిద్వార్", "నైనిటాల్", "పౌరీ గఢ్వాల్", "పితోర్‌గఢ్", "రుద్రప్రయాగ్", "తెహ్రీ గఢ్వాల్", "ఉధమ్ సింగ్ నగర్", "ఉత్తరకాశి"]
+                    },
+                    "West Bengal": {
+                        en: ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"],
+                        te: ["అలీపుర్‌దువార్", "బంకురా", "బీర్భూమ్", "కూచ్ బెహార్", "దక్షిణ్ దినాజ్‌పూర్", "డార్జిలింగ్", "హూగ్లీ", "హౌరా", "జల్పాయ్‌గురి", "ఝర్‌గ్రామ్", "కాలింపాంగ్", "కోల్‌కతా", "మాల్దా", "ముర్షిదాబాద్", "నదియా", "ఉత్తర 24 పరగణాలు", "పశ్చిమ్ బర్ధమాన్", "పశ్చిమ్ మేదినీపూర్", "పూర్బ బర్ధమాన్", "పూర్బ మేదినీపూర్", "పురులియా", "దక్షిణ 24 పరగణాలు", "ఉత్తర్ దినాజ్‌పూర్"]
+                    }
+                },
+                soilTypes: {
+                    en: ["Alluvial Soil", "Black Soil", "Red Soil", "Laterite Soil", "Arid Soil", "Forest Soil", "Peaty Soil", "Saline Soil", "Loam Soil", "Sandy Loam", "Clay Loam", "Silty Loam", "Chalky Soil", "Peat Soil", "Gravel Soil", "Desert Soil", "Mountain Soil", "Red and Yellow Soil", "Clayey Soil", "Sandy Soil"],
+                    te: ["ఒండ్రు నేల", "నల్ల నేల", "ఎర్ర నేల", "లాటరైట్ నేల", "శుష్క నేల", "అటవీ నేల", "పీటీ నేల", "లవణ నేల", "లోమ్ నేల", "ఇసుక లోమ్", "బంకమట్టి లోమ్", "సిల్టీ లోమ్", "సుద్ద నేల", "పీట్ నేల", "కంకర నేల", "ఎడారి నేల", "పర్వత నేల", "ఎరుపు మరియు పసుపు నేల", "బంకమట్టి నేల", "ఇసుక నేల"]
+                },
+                cropTypes: {
+                    en: ["Rice", "Wheat", "Maize", "Cotton", "Sugarcane", "Soybean", "Groundnut", "Mustard", "Pulses", "Jute", "Tea", "Coffee", "Rubber", "Coconut", "Banana", "Mango", "Grapes", "Orange", "Apple", "Potato", "Tomato", "Onion", "Chilli", "Turmeric", "Ginger", "Millet", "Barley", "Sorghum", "Sunflower", "Cashew", "Pepper", "Cardamom", "Clove", "Arecanut", "Betel", "Tobacco", "Guava", "Papaya", "Pineapple", "Pomegranate", "Chickpea", "Lentil", "Pigeon Pea", "Black Gram", "Green Gram", "Horse Gram", "Sesame", "Linseed", "Safflower", "Castor"],
+                    te: ["వరి", "గోధుమ", "మొక్కజొన్న", "పత్తి", "చెరకు", "సోయాబీన్", "వేరుశనగ", "ఆవాలు", "పప్పుధాన్యాలు", "జనపనార", "తేయాకు", "కాఫీ", "రబ్బరు", "కొబ్బరి", "అరటి", "మామిడి", "ద్రాక్ష", "నారింజ", "ఆపిల్", "బంగాళదుంప", "టమోటా", "ఉల్లిపాయ", "మిరప", "పసుపు", "అల్లం", "మిల్లెట్", "బార్లీ", "జొన్న", "పొద్దుతిరుగుడు", "జీడిపప్పు", "మిరియాలు", "యాలకులు", "లవంగం", "వక్క", "తమలపాకు", "పొగాకు", "జామ", "బొప్పాయి", "పైనాపిల్", "దానిమ్మ", "శనగ", "కాయధాన్యాలు", "కందిపప్పు", "మినుములు", "పెసలు", "ఉలవలు", "నువ్వులు", "అవిసె", "కుసుమ", "ఆముదం"]
+                },
+                seasons: {
+                    en: ["Kharif", "Rabi", "Zaid"],
+                    te: ["ఖరీఫ్", "రబీ", "జైద్"]
+                },
+                fertilizers: {
+                    "urea": {
+                        name: { en: "Urea", te: "యూరియా" },
+                        tips: { en: ["Primary Source of Nitrogen (46% N).", "Best applied at sowing time or as a top dressing.", "Crucial for leafy green growth in crops like maize, wheat, and leafy vegetables.", "Dissolves quickly in water for easy application through irrigation.", "Overuse can lead to weak stems and increased susceptibility to pests."], te: ["నత్రజని యొక్క ప్రాథమిక మూలం (46% N).", "విత్తే సమయంలో లేదా పైపాటుగా వాడటం ఉత్తమం.", "మొక్కజొన్న, గోధుమ మరియు ఆకుకూరల వంటి పంటలలో ఆకుపచ్చ పెరుగుదలకు కీలకం.", "నీటిపారుదల ద్వారా సులభంగా వాడటానికి నీటిలో త్వరగా కరుగుతుంది.", "అధిక వినియోగం బలహీనమైన కాండాలకు మరియు తెగుళ్ళకు గురయ్యే అవకాశం పెంచుతుంది."] }
+                    },
+                    "dap": {
+                        name: { en: "DAP (Di-Ammonium Phosphate)", te: "DAP (డై-అమోనియం ఫాస్ఫేట్)" },
+                        tips: { en: ["Excellent source of Phosphorus (46% P) and Nitrogen (18% N).", "Applied at the time of sowing or planting for root development.", "Ideal for all types of crops, especially cereals, pulses, and vegetables.", "Promotes strong root growth, flowering, and seed formation.", "Slightly acidic, so check soil pH before heavy application."], te: ["ఫాస్పరస్ (46% P) మరియు నత్రజని (18% N) యొక్క అద్భుతమైన మూలం.", "వేరు అభివృద్ధి కోసం విత్తే లేదా నాటే సమయంలో వాడతారు.", "అన్ని రకాల పంటలకు, ముఖ్యంగా తృణధాన్యాలు, పప్పుధాన్యాలు మరియు కూరగాయలకు అనువైనది.", "బలమైన వేరు పెరుగుదల, పూత మరియు విత్తన నిర్మాణాన్ని ప్రోత్సహిస్తుంది.", "కొద్దిగా ఆమ్ల స్వభావం కలది, కాబట్టి అధిక వాడకానికి ముందు నేల pH ను తనిఖీ చేయండి."] }
+                    },
+                    "mop": {
+                        name: { en: "MOP (Muriate of Potash)", te: "MOP (మ్యూరియేట్ ఆఫ్ పొటాష్)" },
+                        tips: { en: ["Contains a high amount of Potassium (60% K2O).", "Essential for overall plant health, disease resistance, and fruit quality.", "Beneficial for sugarcane, potato, banana, and coconut.", "Improves water retention in plants and helps them withstand drought.", "Avoid for chloride-sensitive crops like tobacco and some fruits."], te: ["అధిక మొత్తంలో పొటాషియం (60% K2O) ఉంటుంది.", "మొత్తం మొక్కల ఆరోగ్యం, వ్యాధి నిరోధకత మరియు పండు నాణ్యతకు అవసరం.", "చెరకు, బంగాళాదుంప, అరటి మరియు కొబ్బరి పంటలకు ప్రయోజనకరం.", "మొక్కలలో నీటిని నిలుపుకోవడాన్ని మెరుగుపరుస్తుంది మరియు కరువును తట్టుకోవడానికి సహాయపడుతుంది.", "పొగాకు మరియు కొన్ని పండ్ల వంటి క్లోరైడ్-సున్నితమైన పంటలకు దూరంగా ఉండండి."] }
+                    },
+                    "ssp": {
+                        name: { en: "SSP (Single Super Phosphate)", te: "SSP (సింగిల్ సూపర్ ఫాస్ఫేట్)" },
+                        tips: { en: ["Provides Phosphorus (16% P2O5), Calcium (19%), and Sulphur (12%).", "Good for oilseeds like groundnut and mustard due to its sulphur content.", "Promotes root development and is a cost-effective source of phosphorus.", "Best used as a basal dose during land preparation.", "Low phosphorus content compared to DAP, so adjust quantity accordingly."], te: ["ఫాస్పరస్ (16% P2O5), కాల్షియం (19%), మరియు సల్ఫర్ (12%) అందిస్తుంది.", "దాని సల్ఫర్ కంటెంట్ కారణంగా వేరుశెనగ మరియు ఆవాలు వంటి నూనెగింజలకు మంచిది.", "వేరు అభివృద్ధిని ప్రోత్సహిస్తుంది మరియు ఫాస్పరస్ యొక్క చవకైన మూలం.", "భూమి తయారీ సమయంలో బేసల్ డోస్‌గా ఉపయోగించడం ఉత్తమం.", "DAP తో పోలిస్తే తక్కువ ఫాస్పరస్ కంటెంట్, కాబట్టి పరిమాణాన్ని దానికి అనుగుణంగా సర్దుబాటు చేయండి."] }
+                    },
+                    "ammonium_sulphate": {
+                        name: { en: "Ammonium Sulphate", te: "అమ్మోనియం సల్ఫేట్" },
+                        tips: { en: ["Contains Nitrogen (21%) and a high amount of Sulphur (24%).", "Ideal for alkaline soils as it has an acidifying effect.", "Excellent for sulphur-loving crops like onion, garlic, and oilseeds.", "Provides nitrogen in a form that is less prone to leaching.", "Should be mixed well into the soil to prevent nitrogen loss to the atmosphere."], te: ["నత్రజని (21%) మరియు అధిక మొత్తంలో సల్ఫర్ (24%) ఉంటుంది.", "ఆమ్లీకరణ ప్రభావం ఉన్నందున క్షార నేలలకు అనువైనది.", "ఉల్లిపాయ, వెల్లుల్లి మరియు నూనెగింజల వంటి సల్ఫర్-ప్రియమైన పంటలకు అద్భుతమైనది.", "లీచింగ్‌కు తక్కువ గురయ్యే రూపంలో నత్రజనిని అందిస్తుంది.", "వాతావరణంలోకి నత్రజని నష్టాన్ని నివారించడానికి మట్టిలో బాగా కలపాలి."] }
+                    },
+                    "zinc_sulphate": {
+                        name: { en: "Zinc Sulphate", te: "జింక్ సల్ఫేట్" },
+                        tips: { en: ["A micronutrient fertilizer essential for enzyme function.", "Corrects 'Khaira' disease in rice and white bud in maize.", "Applied as a basal dose or as a foliar spray.", "Crucial for chlorophyll production and plant hormone balance.", "Should be applied based on soil test results to avoid toxicity."], te: ["ఎంజైమ్ పనితీరుకు అవసరమైన మైక్రోన్యూట్రియెంట్ ఎరువు.", "వరిలో 'ఖైరా' వ్యాధిని మరియు మొక్కజొన్నలో తెల్ల మొగ్గను సరిచేస్తుంది.", "బేసల్ డోస్‌గా లేదా ఆకులపై పిచికారీగా వాడతారు.", "క్లోరోఫిల్ ఉత్పత్తి మరియు మొక్కల హార్మోన్ల సమతుల్యతకు కీలకం.", "విషపూరితం కాకుండా ఉండటానికి నేల పరీక్ష ఫలితాల ఆధారంగా వాడాలి."] }
+                    },
+                    "boron": {
+                        name: { en: "Boron", te: "బోరాన్" },
+                        tips: { en: ["Micronutrient for cell wall formation, pollination and seed set.", "Deficiency causes 'heart rot' in beet and poor fruit development.", "Important for cauliflower, cabbage, apples, and groundnuts.", "Applied to soil or as a foliar spray in very small quantities.", "Very narrow range between deficiency and toxicity, use with caution."], te: ["కణ గోడ నిర్మాణం, పరాగసంపర్కం మరియు విత్తన సెట్ కోసం మైక్రోన్యూట్రియెంట్.", "లోపం బీట్‌లో 'హార్ట్ రాట్' మరియు పేలవమైన పండు అభివృద్ధికి కారణమవుతుంది.", "కాలీఫ్లవర్, క్యాబేజీ, ఆపిల్ మరియు వేరుశెనగలకు ముఖ్యం.", "చాలా తక్కువ పరిమాణంలో మట్టికి లేదా ఆకులపై పిచికారీగా వాడతారు.", "లోపం మరియు విషపూరితం మధ్య చాలా ఇరుకైన పరిధి, జాగ్రత్తగా వాడండి."] }
+                    },
+                    "magnesium_sulphate": {
+                        name: { en: "Magnesium Sulphate", te: "మెగ్నీషియం సల్ఫేట్" },
+                        tips: { en: ["Source of Magnesium (9.5%) and Sulphur (12%).", "Essential component of chlorophyll, vital for photosynthesis.", "Corrects yellowing between leaf veins in older leaves.", "Beneficial for tomatoes, potatoes, and peppers.", "Highly soluble and can be applied via soil, fertigation, or foliar spray."], te: ["మెగ్నీషియం (9.5%) మరియు సల్ఫర్ (12%) మూలం.", "కిరణజన్య సంయోగక్రియకు ముఖ్యమైన క్లోరోఫిల్ యొక్క అవశ్యక భాగం.", "పాత ఆకులలో సిరల మధ్య పసుపు రంగును సరిచేస్తుంది.", "టమోటాలు, బంగాళాదుంపలు మరియు మిరియాలు కోసం ప్రయోజనకరం.", "అధికంగా కరిగేది మరియు నేల, ఫర్టిగేషన్ లేదా ఆకులపై స్ప్రే ద్వారా వాడవచ్చు."] }
+                    },
+                    "calcium_nitrate": {
+                        name: { en: "Calcium Nitrate", te: "కాల్షియం నైట్రేట్" },
+                        tips: { en: ["Provides Nitrogen (15.5%) and Calcium (19%).", "Improves cell wall strength, preventing issues like blossom-end rot in tomatoes.", "Ideal for fruit and vegetable crops for better quality and shelf life.", "Water-soluble and suitable for drip irrigation and foliar application.", "Should not be mixed with sulphate or phosphate fertilizers to avoid precipitation."], te: ["నత్రజని (15.5%) మరియు కాల్షియం (19%) అందిస్తుంది.", "కణ గోడ బలాన్ని మెరుగుపరుస్తుంది, టమోటాలలో మొగ్గ-చివరి కుళ్ళడం వంటి సమస్యలను నివారిస్తుంది.", "మెరుగైన నాణ్యత మరియు నిల్వ జీవితం కోసం పండు మరియు కూరగాయల పంటలకు అనువైనది.", "నీటిలో కరిగేది మరియు డ్రిప్ ఇరిగేషన్ మరియు ఆకుల అప్లికేషన్‌కు అనుకూలం.", "అవపాతం నివారించడానికి సల్ఫేట్ లేదా ఫాస్ఫేట్ ఎరువులతో కలపకూడదు."] }
+                    },
+                    "potassium_nitrate": {
+                        name: { en: "Potassium Nitrate", te: "పొటాషియం నైట్రేట్" },
+                        tips: { en: ["Source of Potassium (44% K2O) and Nitrogen (13% N).", "Chloride-free, safe for sensitive crops like fruits and tobacco.", "Improves fruit size, color, and sugar content.", "Highly soluble, ideal for fertigation and foliar sprays.", "Best used during flowering and fruiting stages."], te: ["పొటాషియం (44% K2O) మరియు నత్రజని (13% N) మూలం.", "పండ్లు మరియు పొగాకు వంటి సున్నితమైన పంటలకు సురక్షితమైన, క్లోరైడ్ రహితం.", "పండు పరిమాణం, రంగు మరియు చక్కెర కంటెంట్‌ను మెరుగుపరుస్తుంది.", "అధికంగా కరిగేది, ఫర్టిగేషన్ మరియు ఆకుల పిచికారీలకు అనువైనది.", "పూత మరియు కాయ దశలలో ఉత్తమంగా ఉపయోగిస్తారు."] }
+                    },
+                    "map": {
+                        name: { en: "Monoammonium Phosphate (MAP)", te: "మోనోఅమోనియం ఫాస్ఫేట్ (MAP)" },
+                        tips: { en: ["High in Phosphorus (61% P2O5) and contains Nitrogen (12% N).", "Used as a starter fertilizer for strong root establishment.", "Its acidic nature makes it suitable for neutral to alkaline soils.", "Excellent for cereals and vegetable cultivation.", "Highly water-soluble."], te: ["ఫాస్పరస్ (61% P2O5) అధికంగా మరియు నత్రజని (12% N) కలిగి ఉంటుంది.", "బలమైన వేరు స్థాపన కోసం స్టార్టర్ ఎరువుగా ఉపయోగిస్తారు.", "దాని ఆమ్ల స్వభావం తటస్థ నుండి క్షార నేలలకు అనుకూలంగా ఉంటుంది.", "తృణధాన్యాలు మరియు కూరగాయల సాగుకు అద్భుతమైనది.", "నీటిలో బాగా కరుగుతుంది."] }
+                    },
+                    "iron_sulphate": {
+                        name: { en: "Iron Sulphate (Ferrous Sulphate)", te: "ఐరన్ సల్ఫేట్ (ఫెర్రస్ సల్ఫేట్)" },
+                        tips: { en: ["Corrects iron deficiency (chlorosis), seen as yellowing of new leaves.", "Essential for chlorophyll synthesis.", "Commonly used for groundnut, sugarcane, and horticultural crops.", "Can be applied to the soil or as a foliar spray for quick results.", "Effective in slightly acidic to neutral soils."], te: ["ఐరన్ లోపాన్ని (క్లోరోసిస్) సరిచేస్తుంది, కొత్త ఆకులు పసుపు రంగులోకి మారడం ద్వారా కనిపిస్తుంది.", "క్లోరోఫిల్ సంశ్లేషణకు అవసరం.", "సాధారణంగా వేరుశెనగ, చెరకు మరియు ఉద్యాన పంటలకు ఉపయోగిస్తారు.", "శీఘ్ర ఫలితాల కోసం నేలకు లేదా ఆకులపై పిచికారీగా వాడవచ్చు.", "కొద్దిగా ఆమ్ల నుండి తటస్థ నేలలలో ప్రభావవంతంగా ఉంటుంది."] }
+                    },
+                    "manganese_sulphate": {
+                        name: { en: "Manganese Sulphate", te: "మాంగనీస్ సల్ఫేట్" },
+                        tips: { en: ["Cures manganese deficiency, which causes interveinal chlorosis.", "Important for photosynthesis, respiration, and nitrogen assimilation.", "Beneficial for soybean, oats, wheat, and potato.", "Application methods include soil, banding, or foliar spray.", "Deficiency is common in sandy soils with high pH."], te: ["మాంగనీస్ లోపాన్ని నయం చేస్తుంది, ఇది ఇంటర్వీనల్ క్లోరోసిస్‌కు కారణమవుతుంది.", "కిరణజన్య సంయోగక్రియ, శ్వాసక్రియ మరియు నత్రజని సమీకరణకు ముఖ్యం.", "సోయాబీన్, ఓట్స్, గోధుమ మరియు బంగాళాదుంపలకు ప్రయోజనకరం.", "అప్లికేషన్ పద్ధతులలో నేల, బ్యాండింగ్ లేదా ఆకుల పిచికారీ ఉన్నాయి.", "అధిక pH ఉన్న ఇసుక నేలలలో లోపం సాధారణం."] }
+                    },
+                    "copper_sulphate": {
+                        name: { en: "Copper Sulphate", te: "కాపర్ సల్ఫేట్" },
+                        tips: { en: ["Micronutrient required for enzyme activation and photosynthesis.", "Also acts as a fungicide to control diseases like mildew and leaf spots.", "Required in very small amounts.", "Used for vegetables, fruits, and cereals.", "Overuse is toxic to plants and soil microbes."], te: ["ఎంజైమ్ యాక్టివేషన్ మరియు కిరణజన్య సంయోగక్రియకు అవసరమైన మైక్రోన్యూట్రియెంట్.", "బూజు మరియు ఆకు మచ్చలు వంటి వ్యాధులను నియంత్రించడానికి శిలీంద్రనాశకంగా కూడా పనిచేస్తుంది.", "చాలా తక్కువ పరిమాణంలో అవసరం.", "కూరగాయలు, పండ్లు మరియు తృణధాన్యాల కోసం ఉపయోగిస్తారు.", "అధిక వినియోగం మొక్కలు మరియు నేల సూక్ష్మజీవులకు విషపూరితం."] }
+                    },
+                    "npk_19_19_19": {
+                        name: { en: "NPK 19-19-19", te: "NPK 19-19-19" },
+                        tips: { en: ["A balanced, water-soluble fertilizer with equal parts N, P, and K.", "Suitable for all crops during the vegetative growth stage.", "Promotes overall plant development, including shoots, roots, and leaves.", "Ideal for fertigation (drip irrigation) and foliar application.", "Quickly absorbed by plants for rapid results."], te: ["N, P, మరియు K సమాన భాగాలు కలిగిన సమతుల్య, నీటిలో కరిగే ఎరువు.", "మొక్కల పెరుగుదల దశలో అన్ని పంటలకు అనుకూలం.", "మొలకలు, వేర్లు మరియు ఆకులతో సహా మొత్తం మొక్కల అభివృద్ధిని ప్రోత్సహిస్తుంది.", "ఫర్టిగేషన్ (డ్రిప్ ఇరిగేషన్) మరియు ఆకుల అప్లికేషన్‌కు అనువైనది.", "వేగవంతమైన ఫలితాల కోసం మొక్కలచే త్వరగా శోషించబడుతుంది."] }
+                    },
+                    "npk_20_20_20": {
+                        name: { en: "NPK 20-20-20", te: "NPK 20-20-20" },
+                        tips: { en: ["Another balanced NPK fertilizer, similar to 19-19-19.", "Provides essential nutrients for vigorous vegetative growth.", "Used across a wide range of crops including fruits, vegetables, and flowers.", "Fully water-soluble, ensuring no clogging of drip systems.", "Boosts plant immunity and health."], te: ["19-19-19 మాదిరిగానే మరో సమతుల్య NPK ఎరువు.", "శక్తివంతమైన మొక్కల పెరుగుదలకు అవసరమైన పోషకాలను అందిస్తుంది.", "పండ్లు, కూరగాయలు మరియు పువ్వులతో సహా అనేక రకాల పంటలలో ఉపయోగిస్తారు.", "పూర్తిగా నీటిలో కరిగేది, డ్రిప్ సిస్టమ్‌ల అడ్డుపడకుండా నిర్ధారిస్తుంది.", "మొక్కల రోగనిరోధక శక్తిని మరియు ఆరోగ్యాన్ని పెంచుతుంది."] }
+                    },
+                    "npk_13_0_45": {
+                        name: { en: "NPK 13-0-45 (Potassium Nitrate)", te: "NPK 13-0-45 (పొటాషియం నైట్రేట్)" },
+                        tips: { en: ["High in Potassium, with moderate Nitrogen.", "Chloride-free and ideal for the fruiting and ripening stages.", "Enhances fruit quality, sweetness, and color.", "Excellent for fertigation in crops like tomato, pomegranate, and grapes.", "Helps in regulating water movement within the plant."], te: ["పొటాషియం అధికంగా, మధ్యస్థ నత్రజనితో ఉంటుంది.", "క్లోరైడ్ రహితం మరియు కాయ మరియు పక్వానికి వచ్చే దశలకు అనువైనది.", "పండు నాణ్యత, తీపి మరియు రంగును పెంచుతుంది.", "టమోటా, దానిమ్మ మరియు ద్రాక్ష వంటి పంటలలో ఫర్టిగేషన్‌కు అద్భుతమైనది.", "మొక్క లోపల నీటి కదలికను నియంత్రించడంలో సహాయపడుతుంది."] }
+                    },
+                    "npk_0_52_34": {
+                        name: { en: "NPK 0-52-34 (Mono Potassium Phosphate)", te: "NPK 0-52-34 (మోనో పొటాషియం ఫాస్ఫేట్)" },
+                        tips: { en: ["Water-soluble fertilizer with high P and K content.", "Excellent for root development, flowering, and fruit setting.", "Used just before and during the flowering stage.", "Boosts energy transfer within the plant.", "Free of nitrogen, suitable when N application needs to be limited."], te: ["అధిక P మరియు K కంటెంట్ కలిగిన నీటిలో కరిగే ఎరువు.", "వేరు అభివృద్ధి, పూత మరియు కాయ సెట్టింగ్‌కు అద్భుతమైనది.", "పూత దశకు ముందు మరియు సమయంలో ఉపయోగిస్తారు.", "మొక్క లోపల శక్తి బదిలీని పెంచుతుంది.", "N అప్లికేషన్‌ను పరిమితం చేయవలసి వచ్చినప్పుడు అనువైన, నత్రజని రహితం."] }
+                    },
+                    "npk_12_61_0": {
+                        name: { en: "NPK 12-61-0 (Mono Ammonium Phosphate)", te: "NPK 12-61-0 (మోనో అమ్మోనియం ఫాస్ఫేట్)" },
+                        tips: { en: ["High phosphorus fertilizer.", "Ideal as a starter fertilizer to promote strong root systems.", "Its acidity helps in the uptake of other micronutrients.", "Perfect for fertigation at the initial stages of crop growth.", "Fully water-soluble and easily absorbed."], te: ["అధిక ఫాస్పరస్ ఎరువు.", "బలమైన వేరు వ్యవస్థలను ప్రోత్సహించడానికి స్టార్టర్ ఎరువుగా అనువైనది.", "దాని ఆమ్లత్వం ఇతర మైక్రోన్యూట్రియెంట్ల శోషణలో సహాయపడుతుంది.", "పంట పెరుగుదల యొక్క ప్రారంభ దశలలో ఫర్టిగేషన్‌కు సరైనది.", "పూర్తిగా నీటిలో కరిగేది మరియు సులభంగా శోషించబడుతుంది."] }
+                    },
+                    "can": {
+                        name: { en: "Calcium Ammonium Nitrate (CAN)", te: "కాల్షియం అమ్మోనియం నైట్రేట్ (CAN)" },
+                        tips: { en: ["Provides Nitrogen (25%) and Calcium.", "It is a neutral fertilizer, suitable for acidic soils.", "Provides nitrogen in both nitrate and ammoniacal forms for immediate and sustained release.", "Improves soil structure and water infiltration.", "Beneficial for apples, cabbage, and potato."], te: ["నత్రజని (25%) మరియు కాల్షియం అందిస్తుంది.", "ఇది ఒక తటస్థ ఎరువు, ఆమ్ల నేలలకు అనుకూలం.", "తక్షణ మరియు నిరంతర విడుదల కోసం నైట్రేట్ మరియు అమ్మోనియాకల్ రూపాల్లో నత్రజనిని అందిస్తుంది.", "నేల నిర్మాణాన్ని మరియు నీటి చొరబాటును మెరుగుపరుస్తుంది.", "ఆపిల్, క్యాబేజీ మరియు బంగాళాదుంపలకు ప్రయోజనకరం."] }
+                    },
+                    "rock_phosphate": {
+                        name: { en: "Rock Phosphate", te: "రాక్ ఫాస్ఫేట్" },
+                        tips: { en: ["A natural, slow-release source of phosphorus.", "Best for acidic soils where it becomes more available to plants.", "Used as a basal fertilizer for long-duration crops.", "Improves soil fertility over the long term.", "Not water-soluble, its effect is gradual."], te: ["ఫాస్పరస్ యొక్క సహజ, నెమ్మదిగా విడుదలయ్యే మూలం.", "ఆమ్ల నేలలకు ఉత్తమమైనది, ఇక్కడ ఇది మొక్కలకు మరింత అందుబాటులోకి వస్తుంది.", "దీర్ఘకాలిక పంటలకు బేసల్ ఎరువుగా ఉపయోగిస్తారు.", "దీర్ఘకాలంలో నేల సారాన్ని మెరుగుపరుస్తుంది.", "నీటిలో కరగదు, దాని ప్రభావం క్రమంగా ఉంటుంది."] }
+                    },
+                    "bone_meal": {
+                        name: { en: "Bone Meal", te: "ఎముకల పొడి" },
+                        tips: { en: ["An organic fertilizer, rich in Phosphorus and Calcium.", "Slow-release properties make it great for bulbs and flowering plants.", "Promotes strong root growth and flowering.", "Should be mixed into the soil during planting.", "A favorite in organic gardening for root vegetables."], te: ["ఫాస్పరస్ మరియు కాల్షియం అధికంగా ఉండే సేంద్రియ ఎరువు.", "నెమ్మదిగా విడుదలయ్యే లక్షణాలు బల్బులు మరియు పూల మొక్కలకు గొప్పగా చేస్తాయి.", "బలమైన వేరు పెరుగుదల మరియు పూతను ప్రోత్సహిస్తుంది.", "నాటడం సమయంలో మట్టిలో కలపాలి.", "సేంద్రియ తోటపనిలో వేరు కూరగాయలకు ఇష్టమైనది."] }
+                    },
+                    "neem_cake": {
+                        name: { en: "Neem Cake", te: "వేప పిండి" },
+                        tips: { en: ["Organic manure that also acts as a natural pesticide.", "Rich in Nitrogen, Phosphorus, and Potassium.", "Controls nematodes and other soil-borne pests.", "Improves soil health and fertility.", "Applied during land preparation."], te: ["సహజ పురుగుమందుగా కూడా పనిచేసే సేంద్రియ ఎరువు.", "నత్రజని, ఫాస్పరస్ మరియు పొటాషియం అధికంగా ఉంటుంది.", "నematodes మరియు ఇతర నేల ద్వారా సంక్రమించే తెగుళ్లను నియంత్రిస్తుంది.", "నేల ఆరోగ్యం మరియు సారాన్ని మెరుగుపరుస్తుంది.", "భూమి తయారీ సమయంలో వాడతారు."] }
+                    },
+                    "vermicompost": {
+                        name: { en: "Vermicompost", te: "వర్మీకంపోస్ట్" },
+                        tips: { en: ["A high-quality organic fertilizer produced from earthworms.", "Rich in all essential plant nutrients and beneficial microbes.", "Improves soil aeration, structure, and water holding capacity.", "Enhances germination, plant growth, and crop yield.", "Suitable for all types of plants and soils."], te: ["వానపాముల నుండి ఉత్పత్తి చేయబడిన అధిక-నాణ్యత సేంద్రియ ఎరువు.", "అన్ని అవసరమైన మొక్కల పోషకాలు మరియు ప్రయోజనకరమైన సూక్ష్మజీవులతో సమృద్ధిగా ఉంటుంది.", "నేల గాలి ప్రసరణ, నిర్మాణం మరియు నీటిని నిలుపుకునే సామర్థ్యాన్ని మెరుగుపరుస్తుంది.", "మొలకెత్తడం, మొక్కల పెరుగుదల మరియు పంట దిగుబడిని పెంచుతుంది.", "అన్ని రకాల మొక్కలు మరియు నేలలకు అనుకూలం."] }
+                    },
+                    "seaweed_extract": {
+                        name: { en: "Seaweed Extract", te: "సముద్రపు పాచి సారం" },
+                        tips: { en: ["An organic bio-stimulant rich in trace elements and growth hormones.", "Promotes root growth and improves resistance to stress.", "Can be applied as a foliar spray or soil drench.", "Enhances nutrient uptake from the soil.", "Boosts overall plant vigor and yield."], te: ["ట్రేస్ ఎలిమెంట్స్ మరియు గ్రోత్ హార్మోన్లతో సమృద్ధిగా ఉండే సేంద్రియ బయో-స్టిమ్యులెంట్.", "వేరు పెరుగుదలను ప్రోత్సహిస్తుంది మరియు ఒత్తిడికి నిరోధకతను మెరుగుపరుస్తుంది.", "ఆకులపై పిచికారీగా లేదా నేల తడపడంగా వాడవచ్చు.", "నేల నుండి పోషకాల శోషణను పెంచుతుంది.", "మొత్తం మొక్కల శక్తి మరియు దిగుబడిని పెంచుతుంది."] }
+                    },
+                    "humic_acid": {
+                        name: { en: "Humic Acid", te: "హ్యూమిక్ యాసిడ్" },
+                        tips: { en: ["A soil conditioner that improves nutrient uptake.", "Enhances root development and soil microbial activity.", "Increases water retention in soil.", "Can be mixed with other fertilizers to improve their efficiency.", "Particularly effective in sandy or clay soils."], te: ["పోషకాల శోషణను మెరుగుపరిచే నేల కండీషనర్.", "వేరు అభివృద్ధిని మరియు నేల సూక్ష్మజీవుల కార్యకలాపాలను పెంచుతుంది.", "నేలలో నీటి నిలుపుదలని పెంచుతుంది.", "వాటి సామర్థ్యాన్ని మెరుగుపరచడానికి ఇతర ఎరువులతో కలపవచ్చు.", "ముఖ్యంగా ఇసుక లేదా బంకమట్టి నేలలలో ప్రభావవంతంగా ఉంటుంది."] }
+                    },
+                    "potassium_schoenite": {
+                        name: { en: "Potassium Schoenite", te: "పొటాషియం షోనైట్" },
+                        tips: { en: ["Provides Potassium, Magnesium, and Sulphur in a balanced ratio.", "Low in chlorides, making it safe for sensitive crops.", "Improves quality and yield of fruits and vegetables.", "Granular form for easy soil application.", "Good for correcting Mg and K deficiencies simultaneously."], te: ["పొటాషియం, మెగ్నీషియం మరియు సల్ఫర్‌ను సమతుల్య నిష్పత్తిలో అందిస్తుంది.", "క్లోరైడ్‌లు తక్కువగా ఉంటాయి, సున్నితమైన పంటలకు సురక్షితం.", "పండ్లు మరియు కూరగాయల నాణ్యత మరియు దిగుబడిని మెరుగుపరుస్తుంది.", "సులభమైన నేల అప్లికేషన్ కోసం రేణువుల రూపం.", "Mg మరియు K లోపాలను ఏకకాలంలో సరిచేయడానికి మంచిది."] }
+                    },
+                    "chelated_micronutrient_mix": {
+                        name: { en: "Chelated Micronutrient Mix", te: "చెలేటెడ్ మైక్రోన్యూట్రియెంట్ మిక్స్" },
+                        tips: { en: ["A mix of essential micronutrients like Fe, Zn, Mn, Cu in a chelated form.", "Chelation protects nutrients from being locked up in the soil.", "Ensures efficient uptake by the plant.", "Used to correct multiple micronutrient deficiencies simultaneously.", "Applied as a foliar spray for quick results."], te: ["Fe, Zn, Mn, Cu వంటి అవసరమైన మైక్రోన్యూట్రియెంట్ల మిశ్రమం ఒక చెలేటెడ్ రూపంలో.", "చెలేషన్ పోషకాలను నేలలో బంధించకుండా కాపాడుతుంది.", "మొక్క ద్వారా సమర్థవంతమైన శోషణను నిర్ధారిస్తుంది.", "ఏకకాలంలో బహుళ మైక్రోన్యూట్రియెంట్ లోపాలను సరిచేయడానికి ఉపయోగిస్తారు.", "శీఘ్ర ఫలితాల కోసం ఆకులపై పిచికారీగా వాడతారు."] }
+                    },
+                    "sulphur_90": {
+                        name: { en: "Sulphur 90% (Bentonite Sulphur)", te: "సల్ఫర్ 90% (బెంటోనైట్ సల్ఫర్)" },
+                        tips: { en: ["A high-concentration granular sulphur fertilizer.", "Slowly converts to sulphate in the soil for sustained availability.", "Essential for oilseed and pulse crops for protein and oil synthesis.", "Also helps in reclaiming alkaline soils.", "Applied as a basal dose during land preparation."], te: ["అధిక-సాంద్రత గల రేణువుల సల్ఫర్ ఎరువు.", "నిరంతర లభ్యత కోసం నేలలో నెమ్మదిగా సల్ఫేట్‌గా మారుతుంది.", "ప్రోటీన్ మరియు నూనె సంశ్లేషణ కోసం నూనెగింజలు మరియు పప్పుధాన్యాల పంటలకు అవసరం.", "క్షార నేలలను పునరుద్ధరించడంలో కూడా సహాయపడుతుంది.", "భూమి తయారీ సమయంలో బేసల్ డోస్‌గా వాడతారు."] }
+                    },
+                    "liquid_biofertilizers": {
+                        name: { en: "Liquid Biofertilizers (Azotobacter, PSB)", te: "ద్రవ జీవన ఎరువులు (అజోటోబాక్టర్, PSB)" },
+                        tips: { en: ["Contain living microorganisms that fix atmospheric nitrogen or solubilize phosphorus.", "An eco-friendly way to supplement chemical fertilizers.", "Improves soil health and reduces fertilizer costs.", "Applied through seed treatment, soil application, or fertigation.", "Must be stored properly to maintain microbial life."], te: ["వాతావరణ నత్రజనిని స్థిరీకరించే లేదా ఫాస్పరస్‌ను కరిగించే జీవించి ఉన్న సూక్ష్మజీవులను కలిగి ఉంటాయి.", "రసాయన ఎరువులను భర్తీ చేయడానికి పర్యావరణ అనుకూల మార్గం.", "నేల ఆరోగ్యాన్ని మెరుగుపరుస్తుంది మరియు ఎరువుల ఖర్చులను తగ్గిస్తుంది.", "విత్తన శుద్ధి, నేల అప్లికేషన్ లేదా ఫర్టిగేషన్ ద్వారా వాడతారు.", "సూక్ష్మజీవుల జీవితాన్ని నిర్వహించడానికి సరిగ్గా నిల్వ చేయాలి."] }
+                    }
+                },
+                cropRecommendations: {
+                "Rice": { 
+                    en: ["Ensure continuous water logging in the field for optimal growth.", "Use nitrogen-rich fertilizers in split doses for better nutrient management.", "Transplant seedlings when they are 25-30 days old for a healthy start."], 
+                    te: ["సరైన పెరుగుదలకు పొలంలో నిరంతరం నీరు నిలిచి ఉండేలా చూసుకోండి.", "మెరుగైన పోషక నిర్వహణ కోసం నత్రజని అధికంగా ఉండే ఎరువులను విభజించి వాడండి.", "ఆరోగ్యకరమైన ఆరంభం కోసం 25-30 రోజుల వయస్సు ఉన్నప్పుడు నారును నాటండి."] 
+                },
+                "Wheat": { 
+                    en: ["Sow in November for best results in the Rabi season.", "Crown root initiation (21 days after sowing) is the most critical stage for irrigation.", "Use a seed drill for sowing to ensure uniform depth and spacing."], 
+                    te: ["రబీ సీజన్‌లో ఉత్తమ ఫలితాల కోసం నవంబర్‌లో విత్తండి.", "కిరీటం వేరు ఏర్పడే దశ (విత్తిన 21 రోజులకు) నీటిపారుదలకు అత్యంత కీలకమైనది.", "ఏకరీతి లోతు మరియు దూరం కోసం విత్తడానికి సీడ్ డ్రిల్ ఉపయోగించండి."] 
+                },
+                "Maize": { 
+                    en: ["Can be grown in a wide range of soils but prefers well-drained loam.", "Ensure proper spacing for good aeration and sunlight penetration.", "Detasseling in hybrid seed production is a crucial step for quality."], 
+                    te: ["వివిధ రకాల నేలల్లో పెంచవచ్చు కానీ బాగా నీరు పోయే లోమ్ నేలలను ఇష్టపడుతుంది.", "మంచి గాలి ప్రసరణ మరియు సూర్యరశ్మి ప్రవేశానికి సరైన దూరం ఉండేలా చూసుకోండి.", "నాణ్యత కోసం హైబ్రిడ్ విత్తన ఉత్పత్తిలో డీటాసెలింగ్ ఒక కీలకమైన దశ."] 
+                },
+                "Cotton": { 
+                    en: ["Best grown in black soil with good drainage.", "Requires a long frost-free period and high temperatures.", "Protect from bollworms by timely spraying of recommended pesticides."], 
+                    te: ["మంచి నీటి పారుదల ఉన్న నల్ల రేగడి నేలల్లో ఉత్తమంగా పెరుగుతుంది.", "దీర్ఘకాలం మంచు రహిత కాలం మరియు అధిక ఉష్ణోగ్రతలు అవసరం.", "సిఫార్సు చేసిన పురుగుమందులను సకాలంలో పిచికారీ చేయడం ద్వారా కాయతొలుచు పురుగు నుండి రక్షించండి."] 
+                },
+                "Sugarcane": { 
+                    en: ["A long-duration crop that requires heavy fertilization and irrigation.", "Planting in trenches improves yield and prevents lodging (falling over).", "Practice earthing up to support the plant base and encourage root growth."], 
+                    te: ["ఎక్కువ కాలం ఉండే పంట, దీనికి అధిక ఎరువులు మరియు నీటిపారుదల అవసరం.", "కాలువల్లో నాటడం దిగుబడిని మెరుగుపరుస్తుంది మరియు పడిపోవడాన్ని నివారిస్తుంది.", "మొక్కల మొదళ్లకు మట్టిని ఎగదోయడం వలన వేరు పెరుగుదలకు మరియు ఆధారానికి సహాయపడుతుంది."] 
+                },
+                "Soybean": {
+                    en: ["Sow during the onset of monsoon (Kharif season) for best results.", "Inoculate seeds with Rhizobium culture to enhance nitrogen fixation.", "Maintain a weed-free field for the first 45-60 days to prevent yield loss."],
+                    te: ["ఉత్తమ ఫలితాల కోసం రుతుపవనాల ప్రారంభంలో (ఖరీఫ్ సీజన్) విత్తుకోవాలి.", "నత్రజని స్థాపనను పెంచడానికి విత్తనాలకు రైజోబియం కల్చర్‌తో శుద్ధి చేయాలి.", "దిగుబడి నష్టాన్ని నివారించడానికి మొదటి 45-60 రోజులు పొలాన్ని కలుపు లేకుండా చూసుకోవాలి."]
+                },
+                "Groundnut": {
+                    en: ["Prefers well-drained, sandy loam soils for easy peg penetration.", "Apply gypsum at the flowering stage to ensure proper pod development.", "Harvest when the inner shell of the pod turns dark."],
+                    te: ["సులభంగా ఊడలు దిగడానికి, బాగా నీరు ఇంకిపోయే ఇసుకతో కూడిన లోమ్ నేలలు అనుకూలం.", "పూత దశలో జిప్సం వేయడం వలన కాయలు బాగా అభివృద్ధి చెందుతాయి.", "కాయ లోపలి పొట్టు ముదురు రంగులోకి మారినప్పుడు పంట కోయాలి."]
+                },
+                "Mustard": {
+                    en: ["A cool season crop, ideal for the Rabi season.", "Aphids are a major pest; monitor closely and spray insecticide if needed.", "Irrigate at the siliqua (pod) formation stage for better seed filling."],
+                    te: ["ఇది చలికాలపు పంట, రబీ సీజన్‌కు అనువైనది.", "పేనుబంక ఒక ప్రధాన తెగులు; నిశితంగా గమనించి అవసరమైతే పురుగుమందు పిచికారీ చేయాలి.", "కాయ ఏర్పడే దశలో నీరు పెట్టడం వలన గింజలు బాగా నిండుతాయి."]
+                },
+                "Pulses": {
+                    en: ["Generally require less water compared to cereal crops.", "Use Rhizobium inoculants specific to the pulse crop for better nodulation.", "Harvest when 80-85% of the pods are mature and turn yellow or brown."],
+                    te: ["సాధారణంగా తృణధాన్యాల పంటలతో పోలిస్తే వీటికి తక్కువ నీరు అవసరం.", "మంచి వేరు బొడిపెల కోసం, పప్పుధాన్యాల పంటకు ప్రత్యేకమైన రైజోబియం ఇనాక్యులెంట్లను వాడండి.", "80-85% కాయలు పక్వానికి వచ్చి పసుపు లేదా గోధుమ రంగులోకి మారినప్పుడు కోయాలి."]
+                },
+                "Jute": {
+                    en: ["Requires a warm and humid climate with plenty of rainfall.", "Retting (soaking stems in water) is a crucial process to extract the fiber.", "Harvesting at the small pod stage gives the best quality fiber."],
+                    te: ["దీనికి వెచ్చని, తేమతో కూడిన వాతావరణం మరియు సమృద్ధిగా వర్షపాతం అవసరం.", "నార తీయడానికి రెట్టింగ్ (కాండాలను నీటిలో నానబెట్టడం) ఒక కీలకమైన ప్రక్రియ.", "చిన్న కాయల దశలో కోయడం వలన ఉత్తమ నాణ్యత గల నార లభిస్తుంది."]
+                },
+                "Tea": {
+                    en: ["Grows best in acidic soils on high altitudes with distributed rainfall.", "Regular pruning is essential to maintain the 'plucking table' and encourage new shoots.", "Shade trees are important to protect plants from direct sunlight."],
+                    te: ["ఎత్తైన ప్రదేశాలలో, పంపిణీ చేయబడిన వర్షపాతంతో ఆమ్ల నేలల్లో ఉత్తమంగా పెరుగుతుంది.", "కొత్త చిగుళ్లను ప్రోత్సహించడానికి మరియు 'గిల్లే బల్ల'ను నిర్వహించడానికి క్రమం తప్పకుండా కత్తిరించడం అవసరం.", "మొక్కలను ప్రత్యక్ష సూర్యరశ్మి నుండి రక్షించడానికి నీడనిచ్చే చెట్లు ముఖ్యం."]
+                },
+                "Coffee": {
+                    en: ["Requires a mild climate and grows well under shade.", "Berries should be harvested when they are bright red and firm.", "Control coffee berry borer pest through proper sanitation and monitoring."],
+                    te: ["దీనికి తేలికపాటి వాతావరణం అవసరం మరియు నీడలో బాగా పెరుగుతుంది.", "పండ్లు ప్రకాశవంతమైన ఎరుపు రంగులో మరియు గట్టిగా ఉన్నప్పుడు కోయాలి.", "సరైన పారిశుధ్యం మరియు పర్యవేక్షణ ద్వారా కాఫీ కాయతొలుచు పురుగును నియంత్రించండి."]
+                },
+                "Rubber": {
+                    en: ["A tropical tree that requires high humidity and heavy rainfall.", "Tapping for latex should begin only when the tree reaches a certain girth.", "Apply rain guards to the tapping panel during the monsoon season."],
+                    te: ["ఇది ఉష్ణమండల చెట్టు, దీనికి అధిక తేమ మరియు భారీ వర్షపాతం అవసరం.", "చెట్టు నిర్దిష్ట చుట్టుకొలతకు చేరుకున్నప్పుడు మాత్రమే పాలు తీయడానికి గీత పెట్టాలి.", "వర్షాకాలంలో పాలు తీసే ప్యానెల్‌కు రెయిన్ గార్డులను అమర్చండి."]
+                },
+                "Coconut": {
+                    en: ["Prefers sandy loam soils and a humid climate.", "Apply common salt to the basin of the palm to increase nut size and yield.", "Intercropping with banana or pineapple can provide additional income."],
+                    te: ["ఇసుకతో కూడిన లోమ్ నేలలు మరియు తేమతో కూడిన వాతావరణాన్ని ఇష్టపడుతుంది.", "కాయ పరిమాణం మరియు దిగుబడిని పెంచడానికి చెట్టు మొదట్లో సాధారణ ఉప్పును వేయండి.", "అరటి లేదా పైనాపిల్‌తో అంతర పంటలు వేయడం అదనపు ఆదాయాన్ని ఇస్తుంది."]
+                },
+                "Banana": {
+                    en: ["It is a heavy feeder; requires regular application of potassium-rich fertilizers.", "De-suckering is important to remove unwanted shoots and support the main plant.", "Provide support (propping) to bunches to prevent the plant from falling."],
+                    te: ["ఇది ఎక్కువ పోషకాలు తీసుకుంటుంది; పొటాషియం అధికంగా ఉండే ఎరువులను క్రమం తప్పకుండా వేయాలి.", "అవాంఛిత పిలకలను తొలగించి ప్రధాన మొక్కకు మద్దతు ఇవ్వడానికి డీ-సకరింగ్ ముఖ్యం.", "మొక్క పడిపోకుండా గెలలకు ఆధారం (ఊతం) ఇవ్వండి."]
+                },
+                "Mango": {
+                    en: ["Requires a distinct dry period for good flowering and fruit set.", "Pruning of crowded branches after harvesting improves sunlight penetration.", "Protect against mango hoppers and powdery mildew during the flowering stage."],
+                    te: ["మంచి పూత మరియు కాయల కోసం దీనికి స్పష్టమైన పొడి కాలం అవసరం.", "పంట కోసిన తర్వాత రద్దీగా ఉన్న కొమ్మలను కత్తిరించడం వలన సూర్యరశ్మి బాగా ప్రసరిస్తుంది.", "పూత దశలో మామిడి తేనెమంచు పురుగు మరియు బూడిద తెగులు నుండి రక్షించండి."]
+                },
+                "Grapes": {
+                    en: ["Training the vines on a trellis or bower is essential for quality production.", "Pruning is a critical operation that determines the yield and quality of the fruit.", "Apply sulphur dust to control powdery mildew disease."],
+                    te: ["నాణ్యమైన ఉత్పత్తికి పందిరి లేదా తీగలపైకి తీగలను అల్లించడం అవసరం.", "కత్తిరింపు అనేది దిగుబడి మరియు పండు నాణ్యతను నిర్ధారించే కీలకమైన చర్య.", "బూడిద తెగులును నియంత్రించడానికి సల్ఫర్ పొడిని చల్లండి."]
+                },
+                "Orange": {
+                    en: ["Prefers well-drained soils and is sensitive to waterlogging.", "Protect the young plants from frost in winter.", "Fruit drop can be managed by spraying plant growth regulators like NAA."],
+                    te: ["బాగా నీరు ఇంకిపోయే నేలలను ఇష్టపడుతుంది మరియు నీటి నిల్వకు సున్నితంగా ఉంటుంది.", "శీతాకాలంలో యువ మొక్కలను మంచు నుండి రక్షించండి.", "NAA వంటి మొక్కల పెరుగుదల నియంత్రకాలను పిచికారీ చేయడం ద్వారా పండ్లు రాలడాన్ని నిర్వహించవచ్చు."]
+                },
+                "Apple": {
+                    en: ["Requires a cold climate with a specific chilling period to break dormancy.", "Hand thinning of fruits is necessary to ensure good size and quality of remaining apples.", "Protect from scab disease by following a proper spray schedule."],
+                    te: ["నిద్రావస్థను అధిగమించడానికి నిర్దిష్ట శీతలీకరణ కాలంతో కూడిన చల్లని వాతావరణం అవసరం.", "మిగిలిన ఆపిల్‌ల మంచి పరిమాణం మరియు నాణ్యతను నిర్ధారించడానికి చేతితో పండ్లను పలుచగా చేయడం అవసరం.", "సరైన పిచికారీ షెడ్యూల్‌ను అనుసరించడం ద్వారా స్కాబ్ వ్యాధి నుండి రక్షించండి."]
+                },
+                "Potato": {
+                    en: ["Planting on ridges ensures good tuber development and easy harvesting.", "Earthing up is crucial to cover the developing tubers and prevent them from turning green.", "Harvest the crop when the haulms (stems/leaves) start to turn yellow."],
+                    te: ["గట్లపై నాటడం వలన దుంపలు బాగా అభివృద్ధి చెందుతాయి మరియు సులభంగా తవ్వవచ్చు.", "పెరుగుతున్న దుంపలను కప్పి, అవి పచ్చగా మారకుండా నిరోధించడానికి మట్టిని ఎగదోయడం ముఖ్యం.", "మొక్కల ఆకులు, కాండాలు పసుపు రంగులోకి మారడం ప్రారంభించినప్పుడు పంటను తవ్వాలి."]
+                },
+                "Tomato": {
+                    en: ["Staking or providing support to plants prevents fruits from touching the soil.", "Requires consistent watering to prevent blossom-end rot.", "Use hybrid varieties for higher yield and disease resistance."],
+                    te: ["మొక్కలకు కర్రలు పాతడం వలన పండ్లు నేలను తాకకుండా ఉంటాయి.", "కాయల అడుగు కుళ్ళిపోకుండా నివారించడానికి స్థిరమైన నీటిపారుదల అవసరం.", "అధిక దిగుబడి మరియు వ్యాధి నిరోధకత కోసం హైబ్రిడ్ రకాలను వాడండి."]
+                },
+                "Onion": {
+                    en: ["A shallow-rooted crop that requires frequent but light irrigation.", "Bulb development is highly influenced by day length (photoperiod).", "Curing (drying) the bulbs after harvest is essential for long storage life."],
+                    te: ["ఇది తక్కువ లోతు వేర్లు గల పంట, దీనికి తరచుగా కానీ తేలికపాటి నీటిపారుదల అవసరం.", "ఉల్లిగడ్డల అభివృద్ధి పగటి నిడివిపై (ఫోటోపీరియడ్) ఎక్కువగా ఆధారపడి ఉంటుంది.", "పంట కోసిన తర్వాత గడ్డలను ఎండబెట్టడం (క్యూరింగ్) ఎక్కువ కాలం నిల్వ ఉండటానికి అవసరం."]
+                },
+                "Chilli": {
+                    en: ["Thrives in warm and humid climates.", "Leaf curl virus is a major issue; control the vector (whiteflies/thrips).", "Harvest fruits when they are fully grown and have attained the desired color."],
+                    te: ["వెచ్చని మరియు తేమతో కూడిన వాతావరణంలో బాగా పెరుగుతుంది.", "ఆకు ముడత వైరస్ ఒక ప్రధాన సమస్య; దాని వాహకాలను (తెల్లదోమ/తామర పురుగులు) నియంత్రించండి.", "పండ్లు పూర్తిగా పెరిగి, కావాల్సిన రంగు వచ్చినప్పుడు కోయాలి."]
+                },
+                "Turmeric": {
+                    en: ["A long-duration rhizome crop that prefers partial shade.", "Mulching with green leaves after planting helps conserve moisture and control weeds.", "Harvest when the leaves and stem start to dry up and turn yellow."],
+                    te: ["ఇది ఎక్కువ కాలం ఉండే కొమ్ము పంట, పాక్షిక నీడను ఇష్టపడుతుంది.", "నాటిన తర్వాత పచ్చి ఆకులతో మల్చింగ్ చేయడం వలన తేమను నిలుపుకోవచ్చు మరియు కలుపును నియంత్రించవచ్చు.", "ఆకులు మరియు కాండం ఎండిపోయి పసుపు రంగులోకి మారడం ప్రారంభించినప్పుడు తవ్వాలి."]
+                },
+                "Ginger": {
+                    en: ["Requires well-drained, humus-rich soil.", "Treat the seed rhizomes with fungicide before planting to prevent rot diseases.", "Provide light but frequent irrigation to maintain soil moisture."],
+                    te: ["బాగా నీరు ఇంకిపోయే, సేంద్రియ పదార్థాలు అధికంగా ఉండే నేల అవసరం.", "కుళ్ళు తెగుళ్లను నివారించడానికి నాటడానికి ముందు విత్తనపు కొమ్ములను శిలీంద్రనాశకంతో శుద్ధి చేయండి.", "నేల తేమను నిర్వహించడానికి తేలికపాటి కానీ తరచుగా నీటిపారుదల అందించండి."]
+                },
+                "Millet": {
+                    en: ["Highly drought-resistant and suitable for arid and semi-arid regions.", "Requires minimal fertilizer and inputs compared to other cereals.", "Harvest when the grains are hard and fully mature."],
+                    te: ["అధిక కరువు నిరోధకత కలది మరియు శుష్క, పాక్షిక-శుష్క ప్రాంతాలకు అనువైనది.", "ఇతర తృణధాన్యాలతో పోలిస్తే దీనికి తక్కువ ఎరువులు మరియు పెట్టుబడి అవసరం.", "గింజలు గట్టిగా మరియు పూర్తిగా పక్వానికి వచ్చినప్పుడు కోయాలి."]
+                },
+                "Barley": {
+                    en: ["More tolerant to saline soils compared to wheat.", "Sow in the second fortnight of October to the first fortnight of November.", "One or two irrigations are sufficient for a good yield in rainfed areas."],
+                    te: ["గోధుమతో పోలిస్తే ఉప్పు నేలలను ఎక్కువగా తట్టుకుంటుంది.", "అక్టోబర్ రెండవ పక్షం నుండి నవంబర్ మొదటి పక్షం వరకు విత్తుకోవాలి.", "వర్షాధార ప్రాంతాల్లో మంచి దిగుబడికి ఒకటి లేదా రెండు నీటి తడులు సరిపోతాయి."]
+                },
+                "Sorghum": {
+                    en: ["A hardy crop that can withstand drought conditions better than maize.", "Shoot fly is a major pest in the seedling stage; use treated seeds.", "Can be used for grain, fodder, and industrial purposes."],
+                    te: ["ఇది మొక్కజొన్న కంటే కరువు పరిస్థితులను బాగా తట్టుకోగల గట్టి పంట.", "మొలక దశలో ఈగపోటు ఒక ప్రధాన తెగులు; శుద్ధి చేసిన విత్తనాలను వాడండి.", "గింజలు, పశుగ్రాసం మరియు పారిశ్రామిక ప్రయోజనాల కోసం ఉపయోగించవచ్చు."]
+                },
+                "Sunflower": {
+                    en: ["The head of the sunflower tracks the sun (heliotropism).", "Ensure good pollination by honeybees for proper seed set.", "Protect the crop from birds, especially during the seed-filling stage."],
+                    te: ["పొద్దుతిరుగుడు పువ్వు సూర్యుడిని అనుసరిస్తుంది (హీలియోట్రోపిజం).", "సరైన గింజల కోసం తేనెటీగల ద్వారా మంచి పరాగసంపర్కం జరిగేలా చూసుకోండి.", "పంటను, ముఖ్యంగా గింజలు నిండే దశలో పక్షుల నుండి రక్షించండి."]
+                },
+                "Cashew": {
+                    en: ["Prefers well-drained sandy or laterite soils.", "Tea mosquito bug is a major pest that damages new shoots and flowers.", "Intercropping is not recommended as it competes for nutrients."],
+                    te: ["బాగా నీరు ఇంకిపోయే ఇసుక లేదా లాటరైట్ నేలలను ఇష్టపడుతుంది.", "టీ దోమ అనేది కొత్త చిగుళ్లు మరియు పువ్వులను దెబ్బతీసే ఒక ప్రధాన తెగులు.", "పోషకాల కోసం పోటీ పడుతుంది కాబట్టి అంతరపంటలు సిఫార్సు చేయబడవు."]
+                },
+                "Pepper": {
+                    en: ["A climbing vine that needs a support tree or structure to grow.", "Requires a hot and humid climate with abundant rainfall.", "Foot rot (quick wilt) disease is a major concern; ensure good drainage."],
+                    te: ["ఇది ఎగబాకే తీగ, పెరగడానికి ఆధారంగా ఒక చెట్టు లేదా నిర్మాణం అవసరం.", "దీనికి సమృద్ధిగా వర్షపాతంతో కూడిన వేడి మరియు తేమతో కూడిన వాతావరణం అవసరం.", "అడుగు కుళ్ళు (త్వరిత వాడలు) వ్యాధి ఒక ప్రధాన సమస్య; మంచి నీటి పారుదల ఉండేలా చూసుకోండి."]
+                },
+                "Cardamom": {
+                    en: ["Grows best in the shade of evergreen forests at high altitudes.", "Mulching is essential to conserve soil moisture and regulate soil temperature.", "Harvest capsules just before they are fully ripe to prevent splitting."],
+                    te: ["ఎత్తైన ప్రదేశాలలో సతతహరిత అడవుల నీడలో ఉత్తమంగా పెరుగుతుంది.", "నేల తేమను నిలుపుకోవడానికి మరియు నేల ఉష్ణోగ్రతను నియంత్రించడానికి మల్చింగ్ అవసరం.", "పగిలిపోకుండా నివారించడానికి కాయలు పూర్తిగా పక్వానికి రాకముందే కోయాలి."]
+                },
+                "Clove": {
+                    en: ["A tropical evergreen tree that starts bearing after 7-8 years.", "Harvest unopened flower buds when they turn from green to pinkish-red.", "Drying the buds in the sun until they turn dark brown is a key post-harvest step."],
+                    te: ["ఇది ఉష్ణమండల సతతహరిత చెట్టు, 7-8 సంవత్సరాల తర్వాత కాపుకు వస్తుంది.", "విచ్చుకోని పూల మొగ్గలు ఆకుపచ్చ నుండి గులాబీ-ఎరుపు రంగులోకి మారినప్పుడు కోయాలి.", "మొగ్గలను ముదురు గోధుమ రంగులోకి మారే వరకు ఎండలో ఎండబెట్టడం కోత అనంతర ముఖ్యమైన దశ."]
+                },
+                "Arecanut": {
+                    en: ["Grown primarily for its nut, which is chewed.", "Requires a humid climate and cannot tolerate extreme temperatures.", "Yellow leaf disease is a major issue; ensure balanced nutrition."],
+                    te: ["ప్రధానంగా దీనిని నమలడానికి ఉపయోగించే కాయ కోసం పెంచుతారు.", "దీనికి తేమతో కూడిన వాతావరణం అవసరం మరియు తీవ్రమైన ఉష్ణోగ్రతలను తట్టుకోలేదు.", "పసుపు ఆకు తెగులు ఒక ప్రధాన సమస్య; సమతుల్య పోషణను నిర్ధారించుకోండి."]
+                },
+                "Betel": {
+                    en: ["A climbing vine whose leaves are used for chewing.", "Requires continuous moisture and grows best under heavy shade.", "Provide a support structure for the vine to climb."],
+                    te: ["ఇది ఎగబాకే తీగ, దీని ఆకులను నమలడానికి ఉపయోగిస్తారు.", "దీనికి నిరంతర తేమ అవసరం మరియు దట్టమైన నీడలో ఉత్తమంగా పెరుగుతుంది.", "తీగ ఎగబాకడానికి ఒక ఆధార నిర్మాణం అందించండి."]
+                },
+                "Tobacco": {
+                    en: ["Very sensitive to soil chloride; use chloride-free fertilizers.", "Topping (removal of the flower head) is done to encourage leaf growth.", "Curing method (air, fire, or flue) greatly impacts the final quality."],
+                    te: ["నేలలోని క్లోరైడ్‌కు చాలా సున్నితమైనది; క్లోరైడ్ రహిత ఎరువులను వాడండి.", "ఆకుల పెరుగుదలను ప్రోత్సహించడానికి టాపింగ్ (పువ్వు తలను తొలగించడం) చేస్తారు.", "క్యూరింగ్ పద్ధతి (గాలి, నిప్పు, లేదా ఫ్లూ) తుది నాణ్యతను బాగా ప్రభావితం చేస్తుంది."]
+                },
+                "Guava": {
+                    en: ["A hardy fruit crop that can grow in a wide range of soils.", "Pruning during the dry season encourages more fruit-bearing shoots.", "Protect fruits from fruit flies by bagging them or using traps."],
+                    te: ["ఇది గట్టి పండ్ల పంట, వివిధ రకాల నేలల్లో పెరగగలదు.", "పొడి కాలంలో కత్తిరింపు చేయడం వలన ఎక్కువ పండ్లు కాసే కొమ్మలను ప్రోత్సహిస్తుంది.", "పండ్లను సంచులలో కట్టడం లేదా ఎరలను ఉపయోగించడం ద్వారా పండు ఈగల నుండి రక్షించండి."]
+                },
+                "Papaya": {
+                    en: ["A fast-growing crop that requires excellent drainage.", "Foot rot disease is common in waterlogged conditions.", "Maintain a good population of female and male plants for pollination if not using hermaphrodite varieties."],
+                    te: ["ఇది వేగంగా పెరిగే పంట, దీనికి అద్భుతమైన నీటి పారుదల అవసరం.", "నీరు నిలిచే పరిస్థితుల్లో అడుగు కుళ్ళు వ్యాధి సాధారణం.", "ద్విలింగ రకాలను ఉపయోగించకపోతే, పరాగసంపర్కం కోసం ఆడ మరియు మగ మొక్కల మంచి నిష్పత్తిని నిర్వహించండి."]
+                },
+                "Pineapple": {
+                    en: ["A terrestrial herb grown for its fruit.", "Use suckers or slips for propagation.", "It is a drought-tolerant crop but requires moisture for good fruit size."],
+                    te: ["ఇది నేలపై పెరిగే మొక్క, దాని పండు కోసం పెంచుతారు.", "వ్యాప్తి కోసం పిలకలను లేదా రెమ్మలను ఉపయోగించండి.", "ఇది కరువును తట్టుకోగల పంట కానీ మంచి పండు పరిమాణం కోసం తేమ అవసరం."]
+                },
+                "Pomegranate": {
+                    en: ["Prefers a semi-arid climate and is highly drought-tolerant.", "Bacterial blight is a major disease; use disease-free planting material.", "Train the plant to a multi-stem system for better yield."],
+                    te: ["పాక్షిక-శుష్క వాతావరణాన్ని ఇష్టపడుతుంది మరియు అధిక కరువును తట్టుకుంటుంది.", "బాక్టీరియా ముడత ఒక ప్రధాన వ్యాధి; వ్యాధి రహిత నాటడం సామగ్రిని ఉపయోగించండి.", "మంచి దిగుబడి కోసం మొక్కను బహుళ-కాండాల వ్యవస్థకు శిక్షణ ఇవ్వండి."]
+                },
+                "Chickpea": {
+                    en: ["A major pulse crop of the Rabi season.", "Nipping or topping the plants encourages branching and increases yield.", "Pod borer is a significant pest; monitor and manage proactively."],
+                    te: ["ఇది రబీ సీజన్‌లోని ఒక ప్రధాన పప్పుధాన్యాల పంట.", "మొక్కల చివర్లను గిల్లడం వలన కొమ్మలు పెరిగి దిగుబడి పెరుగుతుంది.", "కాయతొలుచు పురుగు ఒక ముఖ్యమైన తెగులు; చురుకుగా పర్యవేక్షించి, నిర్వహించండి."]
+                },
+                "Lentil": {
+                    en: ["A cool-season pulse crop grown in the winter.", "It can fix atmospheric nitrogen, reducing the need for nitrogen fertilizers.", "Harvest when plants turn yellow and pods rattle."],
+                    te: ["ఇది శీతాకాలంలో పెరిగే చల్లని-కాలపు పప్పుధాన్యాల పంట.", "ఇది వాతావరణంలోని నత్రజనిని స్థిరీకరించగలదు, నత్రజని ఎరువుల అవసరాన్ని తగ్గిస్తుంది.", "మొక్కలు పసుపు రంగులోకి మారి, కాయలు గలగలలాడినప్పుడు కోయాలి."]
+                },
+                "Pigeon Pea": {
+                    en: ["A deep-rooted, drought-tolerant pulse crop.", "Often grown as an intercrop with cereals like sorghum or millet.", "Wilt disease is a major problem; use resistant varieties."],
+                    te: ["ఇది లోతైన వేర్లు గల, కరువును తట్టుకోగల పప్పుధాన్యాల పంట.", "తరచుగా జొన్న లేదా సజ్జ వంటి తృణధాన్యాలతో అంతరపంటగా పెంచుతారు.", "ఎండు తెగులు ఒక ప్రధాన సమస్య; నిరోధక రకాలను ఉపయోగించండి."]
+                },
+                "Black Gram": {
+                    en: ["A short-duration pulse crop, suitable for Kharif and summer seasons.", "Yellow mosaic virus is a major disease; grow resistant varieties.", "Requires warm and humid weather for growth."],
+                    te: ["ఇది తక్కువ కాలపరిమితి గల పప్పుధాన్యాల పంట, ఖరీఫ్ మరియు వేసవి కాలాలకు అనువైనది.", "పల్లాకు తెగులు ఒక ప్రధాన వ్యాధి; నిరోధక రకాలను పెంచండి.", "పెరుగుదలకు వెచ్చని మరియు తేమతో కూడిన వాతావరణం అవసరం."]
+                },
+                "Green Gram": {
+                    en: ["A short-duration crop that can be grown between major cropping seasons.", "It is used as a green manure crop to improve soil fertility.", "Requires a warm climate and well-drained loamy soils."],
+                    te: ["ఇది ప్రధాన పంటల సీజన్‌ల మధ్య పెంచగల తక్కువ కాలపరిమితి గల పంట.", "నేల సారాన్ని మెరుగుపరచడానికి దీనిని పచ్చిరొట్ట ఎరువుగా ఉపయోగిస్తారు.", "దీనికి వెచ్చని వాతావరణం మరియు బాగా నీరు ఇంకిపోయే లోమీ నేలలు అవసరం."]
+                },
+                "Horse Gram": {
+                    en: ["Extremely drought-resistant and grown on poor soils.", "Valued for its medicinal properties and as animal fodder.", "Requires minimal care and agricultural inputs."],
+                    te: ["అత్యంత కరువు నిరోధకత కలది మరియు పేలవమైన నేలల్లో పెంచుతారు.", "దీని ఔషధ గుణాలు మరియు పశుగ్రాసం కోసం విలువైనది.", "దీనికి కనీస సంరక్షణ మరియు వ్యవసాయ పెట్టుబడులు అవసరం."]
+                },
+                "Sesame": {
+                    en: ["Grown for its oil-rich seeds.", "It is a short-duration crop that requires a well-drained soil.", "Phyllody is a major disease that turns floral parts into green leafy structures."],
+                    te: ["దీనిని నూనె అధికంగా ఉండే విత్తనాల కోసం పెంచుతారు.", "ఇది తక్కువ కాలపరిమితి గల పంట, దీనికి బాగా నీరు ఇంకిపోయే నేల అవసరం.", "ఫిల్లోడీ అనేది పూల భాగాలను ఆకుపచ్చ ఆకు నిర్మాణాలుగా మార్చే ఒక ప్రధాన వ్యాధి."]
+                },
+                "Linseed": {
+                    en: ["A dual-purpose crop grown for its seeds (oil) and fiber (flax).", "It is a cool-season crop sensitive to frost at the flowering stage.", "Rust and wilt are major diseases to monitor."],
+                    te: ["దీనిని విత్తనాలు (నూనె) మరియు నార (ఫ్లాక్స్) కోసం పెంచే ద్వంద్వ-ప్రయోజన పంట.", "ఇది చల్లని-కాలపు పంట, పూత దశలో మంచుకు సున్నితంగా ఉంటుంది.", "కుంకుమ తెగులు మరియు ఎండు తెగులు పర్యవేక్షించాల్సిన ప్రధాన వ్యాధులు."]
+                },
+                "Safflower": {
+                    en: ["A drought-tolerant oilseed crop with spiny leaves.", "Aphids are a major pest that can be controlled by natural predators like ladybugs.", "Deep roots help it extract moisture from lower soil layers."],
+                    te: ["ఇది ముళ్లతో కూడిన ఆకులతో ఉండే, కరువును తట్టుకోగల నూనెగింజల పంట.", "పేనుబంక ఒక ప్రధాన తెగులు, దీనిని లేడీబగ్స్ వంటి సహజ శత్రువులతో నియంత్రించవచ్చు.", "లోతైన వేర్లు నేల దిగువ పొరల నుండి తేమను గ్రహించడానికి సహాయపడతాయి."]
+                },
+                "Castor": {
+                    en: ["Grown for its non-edible oil which has industrial uses.", "The semi-looper caterpillar is a major defoliating pest.", "It is a hardy crop suitable for dryland farming."],
+                    te: ["పారిశ్రామిక ఉపయోగాలను కలిగి ఉన్న తినదగని నూనె కోసం దీనిని పెంచుతారు.", "సెమీ-లూపర్ గొంగళి పురుగు ఆకులను తినేసే ఒక ప్రధాన తెగులు.", "ఇది మెట్ట వ్యవసాయానికి అనువైన గట్టి పంట."]
+                }
+            }
+            };
+
+            // --- DOM ELEMENTS ---
+            const languageToggle = document.getElementById('languageToggle');
+            const stateSelect = document.getElementById('state');
+            const districtSelect = document.getElementById('district');
+            const soilTypeCropSelect = document.getElementById('soilTypeCrop');
+            const cropTypeSelect = document.getElementById('cropType');
+            const soilTypeFertilizerSelect = document.getElementById('soilTypeFertilizer');
+            const seasonSelect = document.getElementById('season');
+            const soilPhInput = document.getElementById('soilPh');
+            const phValueSpan = document.getElementById('phValue');
+            const cropBtn = document.getElementById('cropBtn');
+            const fertBtn = document.getElementById('fertBtn');
+            const cropResultDiv = document.getElementById('cropResult');
+            const fertilizerResultDiv = document.getElementById('fertilizerResult');
+            
+            let currentLanguage = 'en';
+            let lastCropResult = null;
+            let lastFertilizerResultKey = null;
+
+            // --- INITIALIZATION ---
+            function initialize() {
+                updateUIText(); // Call this first to set the language for the initial population
+            }
+
+            // --- EVENT LISTENERS ---
+            languageToggle.addEventListener('change', () => {
+                currentLanguage = languageToggle.checked ? 'te' : 'en';
+                updateUIText();
+            });
+
+            stateSelect.addEventListener('change', () => {
+                populateDistricts();
+            });
+
+            soilPhInput.addEventListener('input', () => {
+                phValueSpan.textContent = `pH: ${soilPhInput.value}`;
+            });
+
+            cropBtn.addEventListener('click', handleCropRecommendation);
+            fertBtn.addEventListener('click', handleFertilizerRecommendation);
+
+            // --- FUNCTIONS ---
+            function populateStateDropdown() {
+                const selectedState = stateSelect.value;
+                stateSelect.innerHTML = `<option value="">${db.languageContent[currentLanguage].select_an_option}</option>`;
+
+                for (let i = 0; i < db.stateNames.en.length; i++) {
+                    const englishName = db.stateNames.en[i];
+                    const translatedName = db.stateNames[currentLanguage][i];
+                    const opt = document.createElement('option');
+                    opt.value = englishName;
+                    opt.textContent = translatedName;
+                    stateSelect.appendChild(opt);
+                }
+                if (selectedState) {
+                    stateSelect.value = selectedState;
+                }
+            }
+            
+            function populateDistricts() {
+                const selectedState = stateSelect.value;
+                if (selectedState && db.statesAndDistricts[selectedState]) {
+                    const districtOptions = {
+                        en: db.statesAndDistricts[selectedState].en,
+                        te: db.statesAndDistricts[selectedState].te,
+                    };
+                    populateDropdown(districtSelect, districtOptions);
+                } else {
+                    districtSelect.innerHTML = `<option value="">${db.languageContent[currentLanguage].select_state_first}</option>`;
+                }
+            }
+
+            function populateDropdown(selectElement, options) {
+                // Check if the data is a translated object (like {en:[], te:[]})
+                const isTranslated = !Array.isArray(options);
+                const englishOptions = isTranslated ? options.en : options;
+                const translatedOptions = isTranslated ? options[currentLanguage] : options;
+
+                const currentVal = selectElement.value;
+                selectElement.innerHTML = `<option value="">${db.languageContent[currentLanguage].select_an_option}</option>`;
+                
+                englishOptions.forEach((englishOption, index) => {
+                    const opt = document.createElement('option');
+                    // The VALUE is always English for the logic to work
+                    opt.value = englishOption; 
+                    // The TEXT displayed to the user is in the selected language
+                    opt.textContent = translatedOptions[index]; 
+                    selectElement.appendChild(opt);
+                });
+
+                // Keep the selection after language change
+                if(englishOptions.includes(currentVal)) {
+                    selectElement.value = currentVal;
+                }
+            }
+
+            function updateUIText() {
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (db.languageContent[currentLanguage][key]) {
+                        el.textContent = db.languageContent[currentLanguage][key];
+                    }
+                });
+                
+                populateStateDropdown();
+                populateDistricts();
+                populateDropdown(soilTypeCropSelect, db.soilTypes);
+                populateDropdown(cropTypeSelect, db.cropTypes);
+                populateDropdown(soilTypeFertilizerSelect, db.soilTypes);
+                populateDropdown(seasonSelect, db.seasons);
+
+                if (lastCropResult) displayCropResult(lastCropResult);
+                if (lastFertilizerResultKey) displayFertilizerResult(lastFertilizerResultKey);
+            }
+            
+            function handleCropRecommendation() {
+                const state = stateSelect.value;
+                const district = districtSelect.value;
+                const soil = soilTypeCropSelect.value; 
+
+                if (!state || !district || !soil) {
+                    alert('Please fill all fields for crop recommendation.');
+                    return;
+                }
+
+                let recommendedCrop;
+                // ***LOGIC CHANGE HERE***: Search in the English array for the index
+                const soilIndex = db.soilTypes.en.indexOf(soil) % Object.keys(db.cropRecommendations).length;
+                recommendedCrop = Object.keys(db.cropRecommendations)[soilIndex];
+                
+                if (soil === "Black Soil" && state === "Maharashtra") recommendedCrop = "Cotton";
+                else if (soil === "Alluvial Soil" && (state === "Punjab" || state === "Uttar Pradesh")) recommendedCrop = "Wheat";
+                else if (soil === "Red Soil" && state === "Telangana") recommendedCrop = "Maize";
+                else if (soil.includes("Loam") && state === "Andhra Pradesh") recommendedCrop = "Rice";
+
+                lastCropResult = recommendedCrop;
+                displayCropResult(recommendedCrop);
+            }
+            
+            function handleFertilizerRecommendation() {
+                const crop = cropTypeSelect.value;
+                const soil = soilTypeFertilizerSelect.value;
+                const season = seasonSelect.value;
+                const ph = parseFloat(soilPhInput.value);
+
+                if (!crop || !soil || !season) {
+                    alert('Please fill all fields for fertilizer recommendation.');
+                    return;
+                }
+
+                // This function now recommends a KEY, not a name.
+                let recommendedFertilizerKey;
+                const fertilizerKeys = Object.keys(db.fertilizers);
+                const cropIndex = db.cropTypes.en.indexOf(crop) % fertilizerKeys.length;
+                recommendedFertilizerKey = fertilizerKeys[cropIndex];
+
+                // Logic now uses generic keys
+                if (ph < 5.5) recommendedFertilizerKey = "rock_phosphate";
+                if (season === "Rabi" && crop === "Wheat") recommendedFertilizerKey = "dap";
+                if (crop === "Cotton" && soil === "Black Soil") recommendedFertilizerKey = "mop";
+                if (crop === "Rice" && ph < 6.0) recommendedFertilizerKey = "zinc_sulphate";
+                if (crop === "Sugarcane") recommendedFertilizerKey = "ammonium_sulphate";
+
+                lastFertilizerResultKey = recommendedFertilizerKey;
+                displayFertilizerResult(recommendedFertilizerKey);
+            }
+
+            function displayFertilizerResult(fertilizerKey) {
+                const lang = currentLanguage;
+                const recommendation = db.fertilizers[fertilizerKey];
+                if (!recommendation) {
+                    fertilizerResultDiv.innerHTML = `<p>No specific tips available.</p>`;
+                    return;
+                }
+                
+                // Get the translated name and tips from the new structure
+                const fertilizerName = recommendation.name[lang];
+                const tips = recommendation.tips[lang];
+                const tipsHtml = tips.map(tip => `<li>${tip}</li>`).join('');
+                
+                fertilizerResultDiv.innerHTML = `
+                    <h3>${db.languageContent[lang].recommendation_for}</h3>
+                    <p><strong>${db.languageContent[lang].fertilizer_name}:</strong> ${fertilizerName}</p>
+                    <p><strong>${db.languageContent[lang].fertilizer_tips}</strong></p>
+                    <ul>${tipsHtml}</ul>
+                `;
+            }  
+
+            // --- FIXED CODE ---
+            // This function was missing. It displays the crop recommendation result.
+            function displayCropResult(cropKey) {
+                const lang = currentLanguage;
+                const cropRecommendation = db.cropRecommendations[cropKey];
+
+                if (!cropRecommendation) {
+                    cropResultDiv.innerHTML = `<p>No specific recommendation available.</p>`;
+                    return;
+                }
+
+                // Find the translated name of the crop
+                const cropIndex = db.cropTypes.en.indexOf(cropKey);
+                const cropName = (cropIndex !== -1) ? db.cropTypes[lang][cropIndex] : cropKey;
+
+                // Get the translated tips for the crop
+                const tips = cropRecommendation[lang];
+                const tipsHtml = tips.map(tip => `<li>${tip}</li>`).join('');
+
+                cropResultDiv.innerHTML = `
+                    <h3>${db.languageContent[lang].recommendation_for}</h3>
+                    <p><strong>${db.languageContent[lang].crop_name}:</strong> ${cropName}</p>
+                    <p><strong>${db.languageContent[lang].crop_tips}</strong></p>
+                    <ul>${tipsHtml}</ul>
+                `;
+            }
+
+            // --- START THE APP ---
+            initialize();
+        });
+    </script>
+</body>
+</html>

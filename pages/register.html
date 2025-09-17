@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register - Agro Target</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e40af 0%, #047857 100%);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title-wrapper {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: black;
+      text-shadow: 0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3);
+      animation: glow 2s ease-in-out infinite alternate;
+      transition: transform 0.3s ease;
+    }
+
+    .main-title:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 20px #fff, 0 0 30px #f0f0f0, 0 0 40px #e0e0e0;
+    }
+
+    .subtitle {
+      font-size: 2rem;
+      font-weight: 600;
+      color: rgb(255, 255, 255);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(11, 11, 11, 0.3);
+      margin-top: 0.2rem;
+      animation: slideFade 2s ease-in-out;
+    }
+
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 5px #fff, 0 0 10px #ddd;
+      }
+      100% {
+        text-shadow: 0 0 15px #fff, 0 0 25px #ccc;
+      }
+    }
+
+    @keyframes slideFade {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      width: 100%;
+      max-width: 450px;
+      padding: 3rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    .center-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .popup-success {
+      margin-top: 1rem;
+      background: #ffffff;
+      color: #0f5132;
+      font-weight: bold;
+      border: 2px solid #0f5132;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,255,0,0.4), 0 0 40px rgba(0,255,0,0.2);
+      z-index: 9999;
+      display: none;
+      animation: fadePopup 0.5s ease-out forwards;
+      text-align: center;
+    }
+
+    @keyframes fadePopup {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title-wrapper">
+    <h1 class="main-title">&nbsp Welcome to Agro Target 🌿</h1>
+    <p class="subtitle">FertilizeX</p>
+  </div>
+
+  <div class="center-box">
+    <div class="glass">
+      <h2 class="text-3xl font-bold text-center mb-6 text-green-500">Create Account</h2>
+
+      <div class="mb-4">
+        <input type="text" id="name" placeholder="👤 Full Name" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+      </div>
+      <div class="mb-4">
+        <input type="text" id="address" placeholder="🏡 Address" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+      </div>
+      <div class="mb-4">
+        <input type="tel" id="phone" placeholder="📱 Phone Number" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+      </div>
+      <div class="mb-4 relative">
+        <input type="password" id="password" placeholder="🔒 Password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <span onclick="togglePassword()" class="absolute right-3 top-3.5 cursor-pointer text-gray-500 hover:text-green-600">👁️</span>
+      </div>
+      <div class="mb-4">
+        <select id="role" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+          <option value="" disabled selected>🧑‍🌾 Select Role</option>
+          <option value="farmer">👨‍🌾 Farmer</option>
+          <option value="labour">👷 Labour</option>
+        </select>
+      </div>
+      <div id="errorMsg" class="text-red-600 text-sm mb-4 hidden"></div>
+      <button id="registerBtn" class="w-full bg-green-600 text-white py-3 rounded hover:bg-green-700 transition duration-300">Register</button>
+      <p class="text-center mt-4 text-sm">
+        Already have an account? <a href="login.html" class="text-white py-3 transition duration-300">Login here</a>
+      </p>
+
+      <div id="successPopup" class="popup-success">✅ Registered Successfully! Redirecting...</div>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const pwd = document.getElementById("password");
+      pwd.type = pwd.type === "password" ? "text" : "password";
+    }
+
+    function register() {
+      const name = document.getElementById("name").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+      const errorDiv = document.getElementById("errorMsg");
+      const successPopup = document.getElementById("successPopup");
+
+      if (!name || !address || !phone || !password || !role) {
+        errorDiv.textContent = "⚠️ Please fill in all fields.";
+        errorDiv.classList.remove("hidden");
+        return;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        errorDiv.textContent = "⚠️ Phone number must be 10 digits.";
+        errorDiv.classList.remove("hidden");
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      if (users.some(user => user.phone === phone)) {
+        errorDiv.textContent = "⚠️ User with this phone already exists.";
+        errorDiv.classList.remove("hidden");
+        return;
+      }
+
+      users.push({ name, address, phone, password, role });
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("isRegistered", "true");
+
+      errorDiv.classList.add("hidden");
+      successPopup.style.display = 'block';
+
+      setTimeout(() => {
+        window.location.href = "/pages/login.html";
+      }, 3000);
+    }
+
+    // Handle Enter key for form submission
+    document.getElementById("registerBtn").addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        register();
+      }
+    });
+
+    // Also listen on the whole glass div inputs for Enter
+    document.querySelector(".glass").addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        register();
+      }
+    });
+
+    // Or just listen on window:
+    window.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        register();
+      }
+    });
+  </script>
+</body>
+</html>

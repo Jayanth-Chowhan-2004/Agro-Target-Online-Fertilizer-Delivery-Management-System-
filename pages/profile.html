@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile - FertilizeX</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <div class="max-w-md mx-auto mt-12 bg-white p-8 rounded shadow">
+    <h2 class="text-2xl font-bold text-center mb-6 text-blue-700">Your Profile</h2>
+
+    <div id="profileInfo" class="space-y-4">
+      <!-- User Profile Information will be injected here -->
+    </div>
+
+    <div class="mt-8">
+      <button onclick="editProfile()" class="bg-yellow-600 text-white px-6 py-2 rounded hover:bg-yellow-700">Edit Profile</button>
+    </div>
+  </div>
+  <div class="mt-4 text-center">
+    <a href="dashboard.html" class="text-blue-600 underline">← Back to Dashboard</a>
+  </div>
+
+  <script>
+    function renderProfile() {
+      const user = JSON.parse(localStorage.getItem("user")) || { name: "Guest", email: "guest@example.com" };
+      const profileContainer = document.getElementById("profileInfo");
+      profileContainer.innerHTML = `
+        <p><strong>Name:</strong> ${user.name}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+      `;
+    }
+
+    function editProfile() {
+      const user = JSON.parse(localStorage.getItem("user")) || { name: "Guest", email: "guest@example.com" };
+      const name = prompt("Enter your name", user.name);
+      const email = prompt("Enter your email", user.email);
+      
+      if (name && email) {
+        localStorage.setItem("user", JSON.stringify({ name, email }));
+        alert("Profile updated!");
+        renderProfile();
+      } else {
+        alert("Please enter valid details!");
+      }
+    }
+
+    renderProfile();
+  </script>
+</body>
+</html>
